@@ -1,0 +1,47 @@
+img.er_thumb {
+    max-height: 200px;
+    width: 100%;
+    height: auto;
+    max-width: 600px;
+}
+
+td.er_t_i {
+    vertical-align: middle;
+}
+
+/*
+ul.horizontal {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}*/
+#er_menu {
+  background-color: #7fc436;
+  overflow: hidden;
+}
+ul.topnav {
+	list-style-type: none !important;
+}
+.topnav a {
+  float: left;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+.entry ul li, .entry ol li {
+    list-style-type: none; 
+}
+
+.er_sin {
+	visibility: hidden;
+}
