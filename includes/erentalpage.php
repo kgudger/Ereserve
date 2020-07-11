@@ -72,8 +72,9 @@ EOT;
   	  }  
   } 
   $retpage .= "<li><a href='#' onclick='showCat(\"Everything\")'>Everything</a></li>";
-  $retpage .= "<li><input type='text' onchange='erSearch(this.value)' id='er_sin' class='er_sin'></li>";
-  $retpage .= "<li><img src='https://satellite.communitytv.org/wp-content/uploads/2020/07/icons8-search-50.png' onclick='erSClick()'></li>";
+  $retpage .= "<li><input type='text' placeholder='Search Text' onchange='erSearch(this.value)' id='er_sin' class='er_sin'>
+				<img src='https://satellite.communitytv.org/wp-content/uploads/2020/07/icons8-search-50.png' onclick='erSClick()'></li>";
+//  $retpage .= "<li><img src='https://satellite.communitytv.org/wp-content/uploads/2020/07/icons8-search-50.png' onclick='erSClick()'></li>";
   $retpage .= "</ul></div><div id='er_display'>";  
   foreach ($cats as $key => $img) {
 	  $retpage .= "<p></p><a href='#' onclick=showCat('" . $key . "')><h2>" . $key . "</h2></a>";

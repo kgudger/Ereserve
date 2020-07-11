@@ -39,12 +39,12 @@ class DB
 		$result = $this->db->query($sql);
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			$tout   = array(); // array to stuff into json
-			$tout[] = mb_convert_encoding($row["title"],"UTF-8");
-			$tout[] = strval($row["image"]);
+			$tout['title'] = mb_convert_encoding($row["title"],"UTF-8");
+			$tout['image'] = strval($row["image"]);
 			$tdesc  = mb_convert_encoding($row["description"],"UTF-8");
-			$tout[] = strip_tags($tdesc);
+			$tout['description'] = strip_tags($tdesc);
 			$rate   = strval(number_format($row["rate"], 2));
-			$tout[] = strval($rate);
+			$tout['rate'] = strval($rate);
 			$tid   = $row["tid"];  // tid for next query.
 
 			$sql = "SELECT COUNT(*) FROM Items
@@ -54,10 +54,10 @@ class DB
 			$res2 = $this->db->query($sql);
 			$row2 = $res2->fetch(PDO::FETCH_ASSOC);
 			$avail = $row2["COUNT(*)"];
-			$tout[] = strval(number_format(($rate/3*0.7),2)) ;
-			$tout[] = strval($avail);
-			$tout[] = $row["name"];
-			$tout[] = $tid;
+			$tout['day_rate'] = strval(number_format(($rate/3*0.7),2)) ;
+			$tout['availability'] = strval($avail);
+			$tout['category'] = $row["name"];
+			$tout['type_id'] = $tid;
 			$sql = "SELECT fr_tid 
 						FROM `frequently_rented_with` 
 						WHERE tid = $tid";
@@ -66,7 +66,7 @@ class DB
 			while ($row3 = $res3->fetch(PDO::FETCH_ASSOC)) {
 				$fr_out[] = $row3['fr_tid'];
 			}
-			$tout[] = $fr_out;
+			$tout['reserve_with_array'] = $fr_out;
 			$output[]= ($tout);
 		}
 		echo json_encode($output);
