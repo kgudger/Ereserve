@@ -57,6 +57,16 @@ class DB
 			$tout[] = strval(number_format(($rate/3*0.7),2)) ;
 			$tout[] = strval($avail);
 			$tout[] = $row["name"];
+			$tout[] = $tid;
+			$sql = "SELECT fr_tid 
+						FROM `frequently_rented_with` 
+						WHERE tid = $tid";
+			$res3 = $this->db->query($sql);
+			$fr_out = array();
+			while ($row3 = $res3->fetch(PDO::FETCH_ASSOC)) {
+				$fr_out[] = $row3['fr_tid'];
+			}
+			$tout[] = $fr_out;
 			$output[]= ($tout);
 		}
 		echo json_encode($output);

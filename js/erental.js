@@ -89,8 +89,18 @@ function writeItem(data,i) {
 		data[i][4] + "</p>" ;
 	htmldata += "<p><strong>Number Available:</strong> " + 
 		data[i][5] + "</p>" ;
-	htmldata += "<p><strong>Frequently Rented With:</strong></p>";
-	htmldata += "<button>Add to Reservation</button>";
+	if ( data[i][8].length > 0) { //frequently rented array
+		htmldata += "<p><strong>Frequently Rented With:</strong></p>";
+		data[i][8].forEach(function(entry) {
+			let indT = findTid(data,entry);	
+			htmldata += "<p>" + "<a href='#' onclick='showPage("
+                                + indT + ")'>" +
+								data[indT][0] + "</a></p>";
+		});
+		htmldata += "<br>";
+	}
+	htmldata += "<button class='er_button' onclick='cookRes(" + 
+		data[i][7] + ")'>Add to Reservation</button>";
 
 	return htmldata;
 }
@@ -133,10 +143,63 @@ function erSearch(value) {
 function outSearch(data,darr) {
 	let htmldata = "<div id=er_searcho><br><h2>Search Results</h2><br>";
 	htmldata += "<ul>";
-	darr.forEach(function(entry) {
-		htmldata+= "<li><a href='#' onclick='showPage(" + entry + ")'>" + 
-			data[entry][0] + "</a></li>";
-	});
+	if (darr.length > 0) {
+		darr.forEach(function(entry) {
+			htmldata+= "<li><a href='#' onclick='showPage(" + entry + ")'>" + 
+				data[entry][0] + "</a></li>";
+		});
+	}
+	else {
+		htmldata+= "<li><strong>No Results Found</strong></li>";
+	}
 	htmldata += "</ul></div>" ;
 	document.getElementById("er_display").innerHTML = htmldata;
+}
+
+function findTid(data,j) {
+	for (let i = 0; i < data.length; i++) {
+		if (data[i][7] == j) {
+			return i;
+		}
+	}
+}
+
+function createCookie(name, value) {
+   var date = new Date();
+   date.setTime(date.getTime()+(30*60000)); // 30 minutes
+   var expires = "; expires="+date.toGMTString();
+
+   document.cookie = encodeURI(name) + "=" + encodeURI(value) + encodeURI(expires +"; path=/");
+}
+
+function cookRes(i) {
+	var json_str = getCookie('Reservation');
+	var arr =  [];
+	if (json_str !== "") {
+		var a2 = JSON.parse(json_str);
+		a2.forEach(function(entry) {
+			arr.push(entry);
+		});
+	}
+	arr.push(i); // i is actual tid
+	json_str = JSON.stringify(arr);
+	createCookie("Reservation", json_str);
+	let htmldata = "<p><strong><font color='red'>Added to Reservation</font></strong></p>";
+	document.getElementById("er_display").innerHTML += htmldata;
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }
