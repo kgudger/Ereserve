@@ -35,7 +35,7 @@ function showCat(cat) {
  */
 function showPage(i,cat) {
 //	alert("item is " + i);
-	let htmldata = writeItem(retData,i);
+	let htmldata = writeItem(retData,i,cat);
 	htmldata += "<br><button class='er_button' onclick='showCat(\"" + 
 		cat + "\")'>Return to " + cat + " Page</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
@@ -99,9 +99,11 @@ var searchTerm = ""; // global to store searched term
  * function to display page of individual item.
  * @param data is returned data array
  * @param i is reference into data for item.
+ * @param cat is category
  * @return htmldata for individual item page
+ * @return
  */
-function writeItem(data,i) {
+function writeItem(data,i,cat) {
 	let htmldata = "";
 	htmldata += "<br><h2>" + data[i]['title'] + "</h2>" ;
 	htmldata += "<img src='" + data[i]['image'] + "'>" ;	
@@ -117,7 +119,7 @@ function writeItem(data,i) {
 		data[i]['reserve_with_array'].forEach(function(entry) {
 			let indT = findTid(data,entry);	// find frequently rented item
 			htmldata += "<p>" + "<a href='#' onclick='showPage("
-                                + indT + ",'cameras'" + ")'>" +
+                                + indT + ",\"" + cat + "\")'>" +
 								data[indT]['title'] + "</a></p>";
 		});
 		htmldata += "<br>";
@@ -278,4 +280,39 @@ function getCookie(cname) {
     }
   }
   return ""; // return empty string if it doesn't exist
+}
+
+/**
+ * function to display shopping cart 
+ */
+function showCart() {
+	let htmldata = "<br><h2>Shopping Cart</h2>";
+	htmldata += "<h3>Items Reserved For You</h3>";
+	htmldata += "<select name='item1' id='item1'>";
+	htmldata += "<option value='0'></option>";
+	htmldata += "<optgroup label='Cameras'>"
+	retData.forEach(function(entry) {
+			htmldata += "<option value='" + entry['type_id'] + "'>" + entry['title'] + "</option>";
+		});
+	htmldata += "</optgroup>";
+/*	htmldata += "<option value='Cameras'>Cameras</option>";
+	htmldata += "<option value='Audio'>Audio</option>";
+	htmldata += "<option value='Lighting'>Lighting</option>";
+	htmldata += "<option value='Mono / Tripods'>Mono / Tripods</option>";*/
+	htmldata += "</select><br><br>";
+	htmldata += "<button class='er_button' onclick='alert(\"Add Another Item\")'>Add Another Item</button><br><br>";
+	htmldata += "<label for='wname'><input type='text' id='wname' name='wname' required> Your Name</label><br>";
+	htmldata += "<label for='phone'><input type='tel' id='phone' name='phone' required placeholder='123-45-678' pattern='[0-9]{3}-[0-9]{2}-[0-9]{3}'> Your phone number</label><br>";
+	htmldata += "<label for='email'><input type='email' id='email' name='email' required> Your email</label><br>";
+	htmldata += "<br><p>Equipment can only be picked up and returned Monday through Friday from 9:00 AM to 5:00 PM.<br>";
+	htmldata += "This date MUST be <strong>Monday through Friday.</strong><br>";
+	htmldata += "The times MUST be between <strong>9:00 AM and 5:00 PM.</strong></p>";
+    htmldata += "<table class='er_data_tab'>";
+	htmldata += "<tr><td><label for='startdate'><input type='date' id='startdate' name='startdate' required> Reservation Start Date</label></td>";
+	htmldata += "<td><label for 'starttime'><input type='time' id='starttime' name='starttime' min='09:00' max='18:00' required> Start Time</label></td></tr>";
+	htmldata += "<tr><td><label for='enddate'><input type='date' id='enddate' name='enddate' required>Reservation End Date</label></td>";
+	htmldata += "<td><label for 'endtime'><input type='time' id='endtime' name='endtime' min='09:00' max='17:00' required> Stop Time</label></td></tr>";
+	htmldata += "</table><br>";
+	htmldata += "<button class='er_button' onclick='alert(\"Complete Reservation\")'>Complete Reservation</button>";
+	document.getElementById("er_display").innerHTML = htmldata;
 }

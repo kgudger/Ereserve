@@ -54,3 +54,15 @@ ul.topnav {
   font-size: 17px;
   background-color: #7fc436;
 }
+
+.er_image {
+	/* width: 10%; 
+	max-width: 300px;
+	max-height:500px;
+	height:auto;*/
+}
+
+.er_block {
+/*	display:inline-block;
+	padding-right: 25px;*/
+}
