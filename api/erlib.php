@@ -29,7 +29,8 @@ class DB
 
 	function getData()
 	{
-		$output = array(); // output json
+		$output = array(); // item output
+		$output2 = array(); // output json
 		$sql = "SELECT tid,title,description,Types.image AS image,
 				rate, Cat.name AS name
 				FROM Types, Categories AS Cat
@@ -69,6 +70,36 @@ class DB
 			$tout['reserve_with_array'] = $fr_out;
 			$output[]= ($tout);
 		}
-		echo json_encode($output);
+		$output2['types'] = $output;
+		
+		$output3 = array();
+		$sql = "SELECT * FROM Categories";
+		$result = $this->db->query($sql);
+		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+			$tout   = array(); // array to stuff into json
+			$tout['cid'] =    $row["cid"];
+			$tout['name'] =   $row["name"];
+			$tout['active'] = $row["active"];
+			$tout['image'] =  $row["image"];
+			$output3[] = $tout;
+		}
+		$output2['cats'] = $output3;
+
+		$output4 = array();
+		$sql = "SELECT * FROM Status";
+		$result = $this->db->query($sql);
+		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+			$tout   = array(); // array to stuff into json
+			$tout['sid'] =    $row["sid"];
+			$tout['status'] = $row["status"];
+			$output4[] = $tout;
+		}
+		$output2['status'] = $output4;
+		echo json_encode($output2);
 	}
+	
+	function postReserve($json) {
+		echo json_encode($json);
+	}
+
 }
