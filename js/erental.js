@@ -21,9 +21,11 @@ function showCat(cat) {
 	if (cat == "Search") {
 		erSearch(searchTerm) ; // redo search 
 	} else {
-		let htmldata = "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th></tr>";
+		let htmldata  = "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
+		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
 		htmldata += writeLines(retData,cat);
 		htmldata += "</table>";
+		htmldata += "<h4>* Add item to reservation.</h4>";
 		document.getElementById("er_display").innerHTML = htmldata;
 	}
 }
@@ -86,6 +88,8 @@ function writeLines(data,cat) {
 			htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>$" + data[i]['day_rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>" + data[i]['availability'] + "</td>";
+			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
+							data[i]['type_id'] + ")'><img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/plus.png'></td>";
 			htmldata += "</tr>";
 		}
 	}
@@ -173,6 +177,7 @@ function erSearch(value) {
 						console.log("Score " + rkey + " = " + rscore + " " + 
 							"key is " + result2[rkey]['obj']['key'] + " Title is " + 
 							sString);
+						let htmldata  = "<div id=er_searcho><br><h2>Search Results</h2><br></div>";
 						darray.push(bkey);
 					}
 				}
@@ -311,6 +316,7 @@ function showCart() {
 	htmldata += "</table><br>";
 	htmldata += "<button class='er_button' onclick='completeReservation()'>Complete Reservation</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
+	selectNumber = 0; // reset to 0 when creating the form.
 	addCookieItems();
 }
 
@@ -393,7 +399,9 @@ async function completeReservation() {
 		let id  = "er_item" + i;
 		let sel = document.getElementById(id);
 		let val = sel.options[sel.selectedIndex].value;
-		rarr.push(val); // create array of reserved items tids
+		if (val >0) { // there's an item selected
+			rarr.push(val); // create array of reserved items tids
+		}	
 	}
 	if (rarr.length == 0) {
 		alert("No Items In Your Cart, Please Select At Least One Item.");
@@ -441,12 +449,17 @@ async function completeReservation() {
 	resary['phone'] = phone;
 	resary['email'] = email;
 	resary['startdate'] = startdate;
-	resary['enddate'] = enddate;
+	resary['enddate']   = enddate;
 	resary['starttime'] = starttime;
-	resary['endtime ='] = endtime;
+	resary['endtime']   = endtime;
 	let json_str = (JSON.stringify(resary)); // encodeURI not work
 	let response = await postData(json_str);
-	window.location.href = "https://satellite.communitytv.org/wp-content/plugins/Ereserve/temp/satellite.php";
+	if (response['status'] == "OK") {
+		let resId = response['reservation'] ;
+		window.location.href = "https://satellite.communitytv.org/wp-content/plugins/Ereserve/temp/satellite.php?reservation="+resId;
+	} else {
+		alert("Reservation Failed " + toString(response['error']));
+	}
 }
 
 /**

@@ -99,7 +99,60 @@ class DB
 	}
 	
 	function postReserve($json) {
-		echo json_encode($json);
+		$result = array(); // result of operation
+		$itema  = array(); // array of items of type 'ritems'
+		
+		$ritems = $json['ritems']; // array of types to reserve
+		foreach( $ritems as $type ) {
+			$sql = "SELECT `iid` FROM `Items` 
+					WHERE `tid` = ? AND `active`=1 AND `status` = 0 
+					LIMIT 1";
+			$stmt = $this->db->prepare($sql);
+			$stmt->execute(array($type));
+			$row  = $stmt->fetch(PDO::FETCH_ASSOC);
+			if (empty($row)) { // no item available! Stop!
+				$result['status'] = "Error";
+				$reserror = array("Not Available" => $type);
+				$result['error'] = $reserror; // put array into result
+				echo json_encode($result);
+				return;
+			}
+			$itema[$type] = $row['iid']; // array linking type to item to reserve
+		} // if we're still going, found all items
+		$wname  = $json['wname']; // whole name
+		$phone  = $json['phone'];
+		$email  = $json['email'];
+		$startdate = $json['startdate'];
+		$enddate   = $json['enddate'];
+		$starttime = $json['starttime'];
+		$endtime   = $json['endtime'];
+		$sql = "INSERT INTO `reservations` 
+			(`name`, `phone`, `email`, `date1`, `date2`, `time1`, `time2`, `status`)
+			VALUES(?, ?, ?, ?, ?, ?, ?, '1') "; // status 1 is in process
+		$stmt = $this->db->prepare($sql);
+		$stmt->execute(array($wname,$phone,$email,$startdate,$enddate,
+							 $starttime,$endtime));
+		$lastId = $this->db->lastInsertId();
+
+		foreach ( $ritems as $value ) { // put reserved items into detail table
+			$sql = "INSERT INTO `reservation_detail`
+						(`rid`, `item_id`, `status`)
+						VALUES($lastId, ? , 1)"; // status 1 is in process
+			$stmt = $this->db->prepare($sql);
+			$stmt->execute(array($itema[$value]));
+		}
+		// now update each item to the "In Process" status
+		foreach ($itema as $key => $value) {
+			$sql = "UPDATE `Items` 
+					SET `status` = 1
+					WHERE `iid` = ?";
+			$stmt = $this->db->prepare($sql);
+			$stmt->execute(array($value));
+		}
+		// return OK status now
+		$result['status'] = "OK";
+		$result['reservation'] = $lastId;
+		echo json_encode($result);
 	}
 
 }

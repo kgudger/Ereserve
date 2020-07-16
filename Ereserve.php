@@ -23,27 +23,50 @@ function add_my_plugin_stylesheet() {
 add_action( 'wp_print_styles', 'add_my_plugin_stylesheet' );
 
 add_shortcode('e_reserve', 'e_reserve_page');
-function e_reserve_page() {
+function e_reserve_page($atts=[], $content=null,$tag='') {
 /**
  * dbstart.php opens the database and gets the user variables
  */
 require_once("dbstart.php");
-
 include_once("includes/erentalpage.php");
-
-/**
- * The checkArray defines what checkForm does so you don't
- * have to overwrite it in the derived class. */
-
-$checkArray = array();
+include_once("includes/eradminpage.php");
+$a = shortcode_atts( array(
+	'action' => "",
+), $atts );
+if ( strtolower($a['action']) == 'admin' ) { // administration page
+	$checkArray = array();
 /// a new instance of the derived class (from MainPage)
-$dbsort = new erentalpage($db,$sessvar,$checkArray) ;
+	$eradmin = new eradminpage($db,$sessvar,$checkArray) ;
 /// and ... start it up!  
-return $dbsort->main("Equipement Rental", $uid, "", "dfile.php");
+	return $eradmin->main("Equipment Administration", $uid, "", "dfile.php");
+} else if ( strtolower($a['action']) == 'thanks' ) { // thank you page
+	// get rid of cookies
+	setcookie("Reservation", "", time() - 3600);
+	$checkArray = array();
+/// a new instance of the derived class (from MainPage)
+	$erental = new erentalpage($db,$sessvar,$checkArray) ;
+/// and ... start it up!  
+	return $erental->main("Equipment Rental", $uid, "", "dfile.php");
 /**
  * There are 2 choices for redirection dependent on the sessvar
  * above which one gets taken.
  * For this page, altredirect to download. */
 }
+{
+/**
+ * The checkArray defines what checkForm does so you don't
+ * have to overwrite it in the derived class. */
+
+	$checkArray = array();
+/// a new instance of the derived class (from MainPage)
+	$erental = new erentalpage($db,$sessvar,$checkArray) ;
+/// and ... start it up!  
+	return $erental->main("Equipment Rental", $uid, "", "dfile.php");
+/**
+ * There are 2 choices for redirection dependent on the sessvar
+ * above which one gets taken.
+ * For this page, altredirect to download. */
+}
+} // end of function
 
 
