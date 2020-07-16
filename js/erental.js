@@ -145,7 +145,32 @@ function writeItem(data,i,cat) {
  * if cat is not Everything, only display that category
  */
 function erSClick() {
-	document.getElementById("er_sin").style.visibility = "visible";
+	let sval = document.getElementById("er_sin");
+	let ev = new KeyboardEvent('keydown', {altKey:false,
+  bubbles: true,
+  cancelBubble: false, 
+  cancelable: true,
+  charCode: 0,
+  code: "Enter",
+  composed: true,
+  ctrlKey: false,
+  currentTarget: null,
+  defaultPrevented: true,
+  detail: 0,
+  eventPhase: 0,
+  isComposing: false,
+  isTrusted: true,
+  key: "Enter",
+  keyCode: 13,
+  location: 0,
+  metaKey: false,
+  repeat: false,
+  returnValue: false,
+  shiftKey: false,
+  type: "keydown",
+  which: 13});
+
+	sval.dispatchEvent(ev);
 }
 
 /**
@@ -195,7 +220,7 @@ function erSearch(value) {
 function outSearch(data,darr) {
 	let htmldata  = "<div id=er_searcho><br><h2>Search Results</h2><br></div>";
 	if (darr.length > 0) { // if results
-		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th></tr>";
+		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
 		darr.forEach(function(entry) {
 			htmldata += "<tr>";
 			htmldata += "<td class='er_t_i'>" + "<a href='#' onclick='showPage("
@@ -211,9 +236,12 @@ function outSearch(data,darr) {
 			htmldata += "<td class='er_t_i'>$" + data[entry]['rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>$" + data[entry]['day_rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>" + data[entry]['availability'] + "</td>";
+			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
+							data[entry]['type_id'] + ")'><img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/plus.png'></td>";
 			htmldata += "</tr>";
 		});
 		htmldata += "</table>";
+		htmldata += "<h4>* Add item to reservation.</h4>";
 	}
 	else {
 		htmldata+= "<strong>No Results Found</strong>";
@@ -231,6 +259,20 @@ function findTid(data,j) {
 	for (let i = 0; i < data.length; i++) { // search entire array until found
 		if (data[i]['type_id'] == j) {
 			return i;
+		}
+	}
+}
+
+/**
+ * function to find title from tid in data array
+ * @param data is returned data array
+ * @param j is tid
+ * @return title for tid j
+ */
+function findTitle(data,j) {
+	for (let i = 0; i < data.length; i++) { // search entire array until found
+		if (data[i]['type_id'] == j) {
+			return data[i]['title'];
 		}
 	}
 }
@@ -271,6 +313,8 @@ function cookRes(i) {
 	createCookie("Reservation", json_str);
 	let htmldata = "<p><strong><font color='red'>Added to Reservation</font></strong></p>";
 	document.getElementById("er_display").innerHTML += htmldata;
+	$stitle = findTitle(retData,i);
+	alert("Added  " + $stitle + " to your reservation.");
 }
 
 /**
@@ -303,7 +347,7 @@ function showCart() {
 	htmldata += "<div id=er_select></div>";
 	htmldata += "<button class='er_button' onclick='addAnotherItem(\"\")'>Add Another Item</button><br><br>";
 	htmldata += "<label for='wname'><input type='text' id='wname' name='wname' required> Your Name</label><br>";
-	htmldata += "<label for='phone'><input type='tel' id='phone' name='phone' required placeholder='123-45-678' pattern='[0-9]{3}-[0-9]{2}-[0-9]{3}'> Your phone number</label><br>";
+	htmldata += "<label for='phone'><input type='tel' id='phone' name='phone' required placeholder='123-456-7890' pattern='[0-9]{3}-[0-9]{2}-[0-9]{3}'> Your phone number</label><br>";
 	htmldata += "<label for='email'><input type='email' id='email' name='email' required> Your email</label><br>";
 	htmldata += "<br><p>Equipment can only be picked up and returned Monday through Friday from 9:00 AM to 5:00 PM.<br>";
 	htmldata += "This date MUST be <strong>Monday through Friday.</strong><br>";
@@ -354,9 +398,9 @@ function createOptions(selected) {
 function addSelect(number,selected) {
 	let htmldata = "";
 	htmldata += "<select name='er_item" + number + "' id='er_item" + number + "'>";
-	htmldata += "<option value='0'></option>";
+	htmldata += "<option value='0'>(Select)</option>";
 	htmldata += createOptions(selected);
-	htmldata += "</select><br><br>";
+	htmldata += "</select>";
 	return htmldata;
 }
 
@@ -368,7 +412,25 @@ function addSelect(number,selected) {
 
 function addAnotherItem(selected) {
 	if (selected == "") selected = 0; // for simple add Item
-	document.getElementById("er_select").innerHTML += addSelect(selectNumber++,selected);
+	let htmldata = "<div>" ;
+	htmldata += addSelect(selectNumber,selected) ;
+	htmldata += "<a href='#' onclick='remSelect(" + selectNumber + ")'> (remove)</a>";
+	htmldata += "<br><br></div>";
+	document.getElementById("er_select").innerHTML += htmldata;
+	selectNumber++; 
+}
+
+/**
+ * function to remove selected item
+ * @param number is id of select
+ * @param selected is item selected to unselect
+ */
+function remSelect(number) {
+	let id = "er_item" + number ;
+	let elements = document.getElementById(id).options;
+    for(let i = 0; i < elements.length; i++){
+      elements[i].selected = false;
+    }
 }
 
 /**
@@ -415,31 +477,24 @@ async function completeReservation() {
 	var starttime = "";
 	var endtime = "";
 	if ( (wname = checkInput("wname", "Name")) == "" ) {
-		alert("Reservation Error");
 		return;
 	}
 	if ( (phone = checkInput("phone", "Phone")) == "" ) {
-		alert("Reservation Error");
 		return;
 	}
 	if ( (email = checkInput("email", "Email")) == "" ) {
-		alert("Reservation Error");
 		return;
 	}
 	if ( (startdate = checkDate("startdate")) == "" ) {
-		alert("Reservation Error");
 		return;
 	}
 	if ( (enddate   = checkDate("enddate")) == "" ) {
-		alert("Reservation Error");
 		return;
 	}
 	if ( (starttime = checkTime("starttime")) == "" ) {
-		alert("Reservation Error");
 		return;
 	}
 	if ( (endtime   = checkTime("endtime")) == "" ) {
-		alert("Reservation Error");
 		return;
 	}
 //	alert("Reservation Success!");
