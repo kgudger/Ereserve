@@ -19,6 +19,7 @@
 function showCat(cat) {
 //	alert("Category is " + cat);
 	if (cat == "Search") {
+		erSClick();
 		erSearch(searchTerm) ; // redo search 
 	} else {
 		let htmldata  = "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
@@ -245,6 +246,10 @@ function outSearch(data,darr) {
 	}
 	else {
 		htmldata+= "<strong>No Results Found</strong>";
+		// add store to file here
+		let json_str = (JSON.stringify(searchTerm)); 
+		let url = 'https://satellite.communitytv.org/erental.php?command=search';
+		let response = postData(json_str,url);
 	}
 	document.getElementById("er_display").innerHTML = htmldata;
 }
@@ -273,6 +278,20 @@ function findTitle(data,j) {
 	for (let i = 0; i < data.length; i++) { // search entire array until found
 		if (data[i]['type_id'] == j) {
 			return data[i]['title'];
+		}
+	}
+}
+
+/**
+ * function to get availability from tid in data array
+ * @param data is returned data array
+ * @param j is tid
+ * @return availability j
+ */
+function getAvail(data,j) {
+	for (let i = 0; i < data.length; i++) { // search entire array until found
+		if (data[i]['type_id'] == j) {
+			return data[i]['availability'];
 		}
 	}
 }
@@ -308,13 +327,20 @@ function cookRes(i) {
 			arr.push(entry);
 		});
 	}
-	arr.push(i); // i is actual tid
+	let avail = getAvail(retData,i); // get availability of new item
+	if (avail > 0) {
+		arr.push(i); // i is actual tid
+	}
 	json_str = JSON.stringify(arr);
 	createCookie("Reservation", json_str);
-	let htmldata = "<p><strong><font color='red'>Added to Reservation</font></strong></p>";
-	document.getElementById("er_display").innerHTML += htmldata;
-	$stitle = findTitle(retData,i);
-	alert("Added  " + $stitle + " to your reservation.");
+	let stitle = findTitle(retData,i);
+	if (avail > 0) {
+		let htmldata = "<p><strong><font color='red'>" + findTitle(retData,i) + " added to reservation</font></strong></p>";
+		document.getElementById("er_display").innerHTML += htmldata;
+		alert("Added  " + stitle + " to your reservation.");
+	} else {
+		alert(stitle + " NOT available.");
+	}
 }
 
 /**
@@ -344,6 +370,7 @@ function getCookie(cname) {
 function showCart() {
 	let htmldata = "<br><h2>Shopping Cart</h2>";
 	htmldata += "<h3>Items To Reserve</h3>";
+	htmldata += "<p>Please select (or remove) items you want to reserve below. Please fill in all fields. Click 'Complete Reservation' when finished. You will be redirected to our Satellite site to pay for the reservation. Thank you.</p>";
 	htmldata += "<div id=er_select></div>";
 	htmldata += "<button class='er_button' onclick='addAnotherItem(\"\")'>Add Another Item</button><br><br>";
 	htmldata += "<label for='wname'><input type='text' id='wname' name='wname' required> Your Name</label><br>";
@@ -398,7 +425,7 @@ function createOptions(selected) {
 function addSelect(number,selected) {
 	let htmldata = "";
 	htmldata += "<select name='er_item" + number + "' id='er_item" + number + "'>";
-	htmldata += "<option value='0'>(Select)</option>";
+	htmldata += "<option value='0'>(Select item)</option>";
 	htmldata += createOptions(selected);
 	htmldata += "</select>";
 	return htmldata;
@@ -414,7 +441,7 @@ function addAnotherItem(selected) {
 	if (selected == "") selected = 0; // for simple add Item
 	let htmldata = "<div>" ;
 	htmldata += addSelect(selectNumber,selected) ;
-	htmldata += "<a href='#' onclick='remSelect(" + selectNumber + ")'> (remove)</a>";
+	htmldata += "<a href='#' onclick='remSelect(" + selectNumber + ")'> (remove item)</a>";
 	htmldata += "<br><br></div>";
 	document.getElementById("er_select").innerHTML += htmldata;
 	selectNumber++; 
@@ -498,6 +525,8 @@ async function completeReservation() {
 		return;
 	}
 //	alert("Reservation Success!");
+	if (confirm('You are being redirected to the Satellite payment page\nwhere you  will need to log in or create an account.\nIf you cancel, your reservation will not be completed.')) {
+  // Save it!
 	var resary = {};
 	resary['ritems'] = rarr;
 	resary['wname'] = wname;
@@ -508,12 +537,17 @@ async function completeReservation() {
 	resary['starttime'] = starttime;
 	resary['endtime']   = endtime;
 	let json_str = (JSON.stringify(resary)); // encodeURI not work
-	let response = await postData(json_str);
+	let url = 'https://satellite.communitytv.org/erental.php?command=reserve';
+	let response = await postData(json_str,url);
 	if (response['status'] == "OK") {
 		let resId = response['reservation'] ;
 		window.location.href = "https://satellite.communitytv.org/wp-content/plugins/Ereserve/temp/satellite.php?reservation="+resId;
 	} else {
 		alert("Reservation Failed " + toString(response['error']));
+	}
+	} else {
+  // Do nothing!
+		alert("Reservation Cancelled");
 	}
 }
 
@@ -561,9 +595,9 @@ function checkTime(timename) {
 	return time;
 }
 
-async function postData(data) {
+async function postData(data,url) {
   // Default options are marked with *
-  const response = await fetch('https://satellite.communitytv.org/erental.php?command=reserve', {
+  const response = await fetch(url, {
     method: 'POST', // 
 //    mode: 'cors', // no-cors, *cors, same-origin
 //    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached

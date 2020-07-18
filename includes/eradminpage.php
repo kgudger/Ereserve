@@ -84,7 +84,7 @@ function processData(&$uid) {
 //			fwrite($fp, 'id is' . $row['id'] . "status is " . $stat);  
 		}
 	}
-	fclose($fp);  
+//	fclose($fp);  
 }
 
 /**

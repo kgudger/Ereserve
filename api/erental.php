@@ -11,6 +11,11 @@ if ( is_array($_REQUEST) && count($_REQUEST) ) {
   } else if ($command == "reserve") {
 	$data = json_decode(file_get_contents('php://input'), true);
 	echo $db->postReserve($data);
+  } else if ($command == "search") {
+	$data = json_decode(file_get_contents('php://input'), true);
+	$fp = fopen('search.txt', 'a');//opens file in append mode  
+	fwrite($fp, $data ."\n");  
+	fclose($fp);  
   }
   else
     echo "command was not recognized";

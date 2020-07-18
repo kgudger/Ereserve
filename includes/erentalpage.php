@@ -57,6 +57,13 @@ function showContent($title, &$uid) {
 
 	$retpage .= <<<EOT
 <div id='er_main'>
+EOT;
+	$retpage .= "<div id='er_shop' class='er_srch'><a href='#' onclick='showCart()'>View Your Cart
+				<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/cart.png'></a></div>";
+	$retpage .= "<div id='er_srch' class='er_srch'><input type='text' placeholder='Search Text' onkeydown='erSearch(this.value)' id='er_sin' class='er_sin'>
+				<img src='https://satellite.communitytv.org/wp-content/uploads/2020/07/icons8-search-50.png' onclick='erSClick()'></div>";
+
+	$retpage .= <<<EOT
 <div id='er_menu'>
 EOT;
   $cats = array(); 
@@ -72,10 +79,14 @@ EOT;
   	  }  
   } 
   $retpage .= "<li><a href='#' onclick='showCat(\"Everything\")'>Everything</a></li>";
-  $retpage .= "<li><a href='#' onclick='showCart()'>Shopping Cart</a></li>";
-  $retpage .= "<li><input type='text' placeholder='Search Text' onkeydown='erSearch(this.value)' id='er_sin' class='er_sin'>
-				<img src='https://satellite.communitytv.org/wp-content/uploads/2020/07/icons8-search-50.png' onclick='erSClick()'></li>";
-  $retpage .= "</ul></div><div id='er_display'>";  
+//  $retpage .= "<li><a href='#' onclick='showCart()'>Shopping Cart</a></li>";
+  $retpage .= <<<EOT
+</ul></div>
+<div id='er_display'>
+<br><h3>Instructions</h3>Browse our equipment by category by clicking below 
+or on the banner above. Select equipment to add to your cart then check out 
+with "View Your Cart". You can search for items using the Search box above. Thanks.
+EOT;
   foreach ($cats as $key => $img) {
 	  $retpage .= "<div class='er_block'><br><br><a href='#' onclick='showCat(\"" . $key . "\")'><h2>" . $key . "</h2>";
 	  $retpage .= "<img class='er_image' src='" . $img . "'></a></div>";

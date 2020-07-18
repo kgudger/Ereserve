@@ -19,6 +19,8 @@ function add_my_plugin_stylesheet() {
 	wp_enqueue_script('erental_script');
 	wp_register_script('fuzzysort','/wp-content/plugins/Ereserve/js/fuzzysort.js');
 	wp_enqueue_script('fuzzysort');
+	wp_register_script('erequip','/wp-content/plugins/Ereserve/js/erequip.js');
+	wp_enqueue_script('erequip');
 }
 add_action( 'wp_print_styles', 'add_my_plugin_stylesheet' );
 
@@ -30,6 +32,7 @@ function e_reserve_page($atts=[], $content=null,$tag='') {
 require_once("dbstart.php");
 include_once("includes/erentalpage.php");
 include_once("includes/eradminpage.php");
+include_once("includes/erequippage.php");
 $a = shortcode_atts( array(
 	'action' => "",
 ), $atts );
@@ -51,7 +54,13 @@ if ( strtolower($a['action']) == 'admin' ) { // administration page
  * There are 2 choices for redirection dependent on the sessvar
  * above which one gets taken.
  * For this page, altredirect to download. */
-}
+} else if ( strtolower($a['action']) == 'equip' ) { // thank you page
+	$checkArray = array();
+/// a new instance of the derived class (from MainPage)
+	$erequip = new erequipPage($db,$sessvar,$checkArray) ;
+/// and ... start it up!  
+	return $erequip->main("Equipment Administration", $uid, "", "dfile.php");
+} else
 {
 /**
  * The checkArray defines what checkForm does so you don't

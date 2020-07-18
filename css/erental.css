@@ -20,6 +20,7 @@ ul.horizontal {
 #er_menu {
   background-color: #7fc436;
   overflow: hidden;
+  width: 100%;
 }
 ul.topnav {
 	list-style-type: none !important;
@@ -44,6 +45,9 @@ ul.topnav {
 
 .er_sin {
 /*	visibility: hidden;*/
+  box-sizing: border-box;
+  border: 3px solid green;
+  border-radius: 4px;
 }
 
 .er_button {
@@ -65,4 +69,17 @@ ul.topnav {
 .er_block {
 /*	display:inline-block;
 	padding-right: 25px;*/
+}
+.er_srch {
+    right: 40px;
+    float: right;
+    font-size: large;
+}
+
+select {
+	font-size:16px;
+}
+
+#er_display {
+	font-size:14px
 }
