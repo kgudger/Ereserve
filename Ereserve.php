@@ -17,6 +17,8 @@ function add_my_plugin_stylesheet() {
 	wp_enqueue_style('erental');
 	wp_register_script('erental_script','/wp-content/plugins/Ereserve/js/erental.js');
 	wp_enqueue_script('erental_script');
+	wp_register_script('ereserv_script','/wp-content/plugins/Ereserve/js/ereserv.js');
+	wp_enqueue_script('ereserv_script');
 	wp_register_script('fuzzysort','/wp-content/plugins/Ereserve/js/fuzzysort.js');
 	wp_enqueue_script('fuzzysort');
 	wp_register_script('erequip','/wp-content/plugins/Ereserve/js/erequip.js');
