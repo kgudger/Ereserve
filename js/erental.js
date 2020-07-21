@@ -22,9 +22,9 @@ function showCat(cat) {
 		erSClick();
 		erSearch(searchTerm) ; // redo search 
 	} else {
-		for (let i = 0; i < breadBox.length; i++) {
+/*		for (let i = 0; i < breadBox.length; i++) {
 			breadBox.pop();
-		}
+		}*/
 		breadBox.push({"cat":cat});
 		let htmldata = printBread();
 		htmldata += "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
@@ -47,8 +47,9 @@ function showPage(i,cat) {
 	let htmldata = printBread();
 	htmldata += "<br>";
 	htmldata += writeItem(retData,i,cat);
-	htmldata += "<br><button class='er_button' onclick='showCat(\"" + 
-		cat + "\")'>Return to " + cat + " Page</button>";
+	let breadspot = breadBox.length - 2;
+	htmldata += "<br><button class='er_button' onclick='sliceBread(" + 
+		breadspot + ")'>Return to " + cat + " Page</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
 }
 
@@ -68,6 +69,7 @@ const fetchRecs = async () => {
 		}
 		catData    = data['cats']; 
 		statusData = data['status'];
+		itemData   = data['items'];
 	  	return data 
 	  	})
 }
@@ -111,9 +113,10 @@ var listOfObjects = []; // defined as an object, for search.
 var searchTerm = ""; // global to store searched term
 var statusData = []; // global array of returned status options
 var catData = []; 	 // global array of returned categories 
+var itemData = []; 	 // global array of returned items 
 var selectNumber = 0; // how many selects added to reservation form
 					// remember to reset this on successful reservation
-var breadBox = []; // array to act as stack for breadcrumbs
+var breadBox = [{"home":"Home"}]; // array to act as stack for breadcrumbs
 
 /**
  * function to display page of individual item.
@@ -184,42 +187,52 @@ function erSClick() {
 }
 
 /**
- * function to search object
+ * function to set up to search object
  * @param value is value to search for
  * uses fuzzysort
  */
 function erSearch(value) {
 //	alert("Search for " + value);
     if(event.key === 'Enter') {
-		searchTerm = value ; // save searched value to return to search
-		const options2 = {
-		limit: 10, // don't return more results than you need!
-		threshold: -10000, // don't return bad results
+		let darray = realSearch(value);
+		outSearch(retData,darray);	// display search results page
+	}
+}
 
-		keys: ['title', // fields to search, title & description
-				'desc']
-		}
-		const result2 = fuzzysort.go(value,listOfObjects,options2);
+/**
+ * function to search object
+ * @param value is value to search for
+ * @return darray is array of results
+ * uses fuzzysort
+ */
+function realSearch(value) {
+	searchTerm = value ; // save searched value to return to search
+	const options2 = {
+	limit: 10, // don't return more results than you need!
+	threshold: -10000, // don't return bad results
+
+	keys: ['title', // fields to search, title & description
+			'desc']
+	}
+	const result2 = fuzzysort.go(value,listOfObjects,options2);
 	
-		let darray = [] ; // empty array for result indices
-		if ( result2['total'] != 0 ) { // number of returned results
-			for (var rkey in result2) {
-				if (rkey != "total") { // there's one final rkey that's not data
-					var rscore = result2[rkey]['score'] ; // get search score
-					if ( rscore > -200) { // good result - 200 seems right
-						let bkey = result2[rkey]['obj']['key'] ; // index into data array
-						let sString = retData[bkey]['title'];
-						console.log("Score " + rkey + " = " + rscore + " " + 
-							"key is " + result2[rkey]['obj']['key'] + " Title is " + 
-							sString);
-						let htmldata  = "<div id=er_searcho><br><h2>Search Results</h2><br></div>";
-						darray.push(bkey);
-					}
+	let darray = [] ; // empty array for result indices
+	if ( result2['total'] != 0 ) { // number of returned results
+		for (var rkey in result2) {
+			if (rkey != "total") { // there's one final rkey that's not data
+				var rscore = result2[rkey]['score'] ; // get search score
+				if ( rscore > -200) { // good result - 200 seems right
+					let bkey = result2[rkey]['obj']['key'] ; // index into data array
+					let sString = retData[bkey]['title'];
+					console.log("Score " + rkey + " = " + rscore + " " + 
+						"key is " + result2[rkey]['obj']['key'] + " Title is " + 
+						sString);
+					darray.push(bkey);
 				}
 			}
 		}
-		outSearch(retData,darray);	// display search results page
 	}
+	return darray;
 }
 
 /**
@@ -442,6 +455,9 @@ function sliceBread(i) {
 			break;
 		case "shop":
 			showCart();
+			break;
+		case "home":
+			window.location.reload(false); 
 			break;
 		default:
 			break;

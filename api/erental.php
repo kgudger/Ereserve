@@ -16,6 +16,9 @@ if ( is_array($_REQUEST) && count($_REQUEST) ) {
 	$fp = fopen('search.txt', 'a');//opens file in append mode  
 	fwrite($fp, $data ."\n");  
 	fclose($fp);  
+  } else if ($command == "upItem") {
+	$data = json_decode(file_get_contents('php://input'), true);
+	echo $db->postItem($data);
   }
   else
     echo "command was not recognized";

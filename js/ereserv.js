@@ -30,15 +30,17 @@ function showCart() {
 	htmldata += "This date MUST be <strong>Monday through Friday.</strong><br>";
 	htmldata += "The times MUST be between <strong>9:00 AM and 5:00 PM.</strong></p>";
     htmldata += "<table class='er_data_tab'>";
-	htmldata += "<tr><td><label for='startdate'><input type='date' id='startdate' name='startdate' required> Reservation Start Date</label></td>";
+	htmldata += "<tr><td><label for='startdate'><input type='date' id='startdate' name='startdate' required onchange='calcPrice()'> Reservation Start Date</label></td>";
 	htmldata += "<td><label for 'starttime'><input type='time' id='starttime' name='starttime' min='09:00' max='17:00' required> Start Time</label></td></tr>";
-	htmldata += "<tr><td><label for='enddate'><input type='date' id='enddate' name='enddate' required>Reservation End Date</label></td>";
+	htmldata += "<tr><td><label for='enddate'><input type='date' id='enddate' name='enddate' required onchange='calcPrice()'>Reservation End Date</label></td>";
 	htmldata += "<td><label for 'endtime'><input type='time' id='endtime' name='endtime' min='09:00' max='17:00' required> Stop Time</label></td></tr>";
 	htmldata += "</table><br>";
+	htmldata += "<p id='total_cost'></p>";
 	htmldata += "<button class='er_button' onclick='completeReservation()'>Complete Reservation</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
 	selectNumber = 0; // reset to 0 when creating the form.
 	addCookieItems();
+	calcPrice() ; // add in total price
 }
 
 /**
@@ -74,7 +76,7 @@ function createOptions(selected) {
  */
 function addSelect(number,selected) {
 	let htmldata = "";
-	htmldata += "<select name='er_item" + number + "' id='er_item" + number + "'>";
+	htmldata += "<select name='er_item" + number + "' id='er_item" + number + "' onchange='calcPrice()'>";
 	htmldata += "<option value='0'>(Select item)</option>";
 	htmldata += createOptions(selected);
 	htmldata += "</select>";
@@ -108,6 +110,7 @@ function remSelect(number) {
     for(let i = 0; i < elements.length; i++){
       elements[i].selected = false;
     }
+    calcPrice();
 }
 
 /**
@@ -128,9 +131,7 @@ function addCookieItems() {
 }	
 
 /**
- * function to add another item to reservation form
- * increments selectNumber
- * @param selected is item selected
+ * function to complete registration
  */
 async function completeReservation() {
 	let rarr = []; // empty reservation tid array
@@ -245,6 +246,11 @@ function checkTime(timename) {
 	return time;
 }
 
+/**
+ * function to post data to the server.
+ * @param data - json packet to send
+ * @param url  - url to send to, including command
+ */
 async function postData(data,url) {
   // Default options are marked with *
   const response = await fetch(url, {
@@ -260,4 +266,44 @@ async function postData(data,url) {
     body: (data) // body data type must match "Content-Type" header
   });
   return response.json(); // parses JSON response into native JavaScript objects
+}
+
+/**
+ * function to calculate price
+ */
+function calcPrice() {
+
+	let totalcost = 0;  // total cost
+	let startDate = document.getElementById('startdate').value;
+	let endDate = document.getElementById('enddate').value;
+	const timeDiff  = (new Date(endDate)) - (new Date(startDate));
+	let   days      = Math.round(timeDiff / (1000 * 60 * 60 * 24));
+	days = days || 0 ;
+	if (days <= 3) days = 3; // minimum days
+	let factor = 1 + ((( days - 3 )/3) * 0.7) ; //
+	
+	for (let i = 0; i < selectNumber; i++ ) {
+		let id  = "er_item" + i;
+		let sel = document.getElementById(id);
+		let val = sel.options[sel.selectedIndex].value;
+		if (val >0) { // there's an item selected
+			totalcost += factor * findRate(retData,val); // add in cost
+		}	
+	}
+	let priceSpot = document.getElementById('total_cost');
+	priceSpot.innerHTML = "Total Cost is: $" + totalcost.toFixed(2); ;
+}
+
+/**
+ * function to find rate from tid in data array
+ * @param data is returned data array
+ * @param j is tid
+ * @return title for tid j
+ */
+function findRate(data,j) {
+	for (let i = 0; i < data.length; i++) { // search entire array until found
+		if (data[i]['type_id'] == j) {
+			return data[i]['rate'];
+		}
+	}
 }

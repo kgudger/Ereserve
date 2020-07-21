@@ -32,7 +32,7 @@ class DB
 		$output = array(); // item output
 		$output2 = array(); // output json
 		$sql = "SELECT tid,title,description,Types.image AS image,
-				rate, Cat.name AS name
+				rate, Cat.name AS name, Types.active AS active
 				FROM Types, Categories AS Cat
                        		WHERE Types.active = 1
                         	AND Cat.cid = Types.cid
@@ -59,6 +59,7 @@ class DB
 			$tout['availability'] = strval($avail);
 			$tout['category'] = $row["name"];
 			$tout['type_id'] = $tid;
+			$tout['active']  = strval($row['active']);
 			$sql = "SELECT fr_tid 
 						FROM `frequently_rented_with` 
 						WHERE tid = $tid";
@@ -95,6 +96,22 @@ class DB
 			$output4[] = $tout;
 		}
 		$output2['status'] = $output4;
+
+		$output5 = array();
+		$sql = "SELECT * FROM Items";
+		$result = $this->db->query($sql);
+		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+			$tout   = array(); // array to stuff into json
+			$tout['iid'] =    $row["iid"];
+			$tout['tid'] =    $row["tid"];
+			$tout['inventory'] =    $row["inventory"];
+			$tout['satellite_id'] =    $row["satellite_id"];
+			$tout['status'] = $row["status"];
+			$tout['active'] = $row["active"];
+			$output5[] = $tout;
+		}
+		$output2['items'] = $output5;
+
 		echo json_encode($output2);
 	}
 	
@@ -154,5 +171,19 @@ class DB
 		$result['reservation'] = $lastId;
 		echo json_encode($result);
 	}
-
+// postItem
+	function postItem($json) {
+		$result = array(); // result of operation
+		$frw    = array(); // array of items of type 'ritems'
+		
+		$itemid = $json['id']; // tid
+		$cid = $json['cat']; // category #
+		$title = $json['title']; // title
+		$description = $json['desc']; // description
+		$image = $json['image']; // image url
+		$rate  = $json['rate']; // rate
+		$frw   = explode("," , $json['frw']); // frequently rented with string -> array
+		$result['status'] = "OK";
+		echo json_encode($result);
+	}
 }

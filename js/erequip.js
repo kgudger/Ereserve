@@ -22,7 +22,7 @@ function showCatE(cat) {
 		erSearchE(searchTerm) ; // redo search 
 	} else {
 		let htmldata  = "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
-		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>Edit<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
+		htmldata += "<table class='er_table'><tr><th>TypeID</th><th>Category</th><th>Title</th><th>Description</th><th>Image</th><th>3 Day Rate</th><th>Rented With</th><th>Update</th></tr>";
 		htmldata += writeLinesE(retData,cat);
 		htmldata += "</table>";
 		document.getElementById("er_display").innerHTML = htmldata;
@@ -34,11 +34,16 @@ function showCatE(cat) {
  * @param i is line in returned data to display (item)
  * @cat is category or search page
  */
-function showPageE(i,cat) {
+function showPageE(i) {
 //	alert("item is " + i);
-	let htmldata = writeItemE(retData,i,cat);
-	htmldata += "<br><button class='er_button' onclick='showCatE(\"" + 
-		cat + "\")'>Return to " + cat + " Page</button>";
+	let htmldata  = "<table class='er_table'><tr><th>ItemID</th><th>Type</th><th>Inventory</th><th>SatelliteID</th><th>status</th><th>Active</th><th>Update</th></tr>";
+	let data = itemData; // list of all items
+	for (let j = 0; j < data.length; j++) { // only display type passed
+		if ( data[j]['tid'] == i ) { // is it the right type?
+			htmldata += writeItemE(j);
+		}
+	}
+	htmldata += "</table>";
 	document.getElementById("er_display").innerHTML = htmldata;
 }
 
@@ -54,22 +59,35 @@ function writeLinesE(data,cat) {
 	let htmldata = "";
 	for (let i = 0; i < data.length; i++) { // only display category passed
 		if ( (cat == "Everything") || (data[i]['category'] == cat) ) {
-			htmldata += "<tr>";
-			htmldata += "<td class='er_t_i'>" + "<a href='#' onclick='showPageE("
-                                + i + ",\"" + cat + "\")'>" +
-				data[i]['title'] + "</a></td>"; // onclick to show individual pages
-			htmldata += "<td class='er_t_i'><img class='er_thumb' src='" + 
-				data[i]['image'] + "'></td>";
-			let sstr = data[i]['description'].substring(0, 500)
-			htmldata += "<td>" + sstr + 
-				"<a href='#' onclick='showPageE(" + i + ",\"" + cat + "\")'> ...more" + "</a></td>";
-				// for description, only show first 500 characters, 
-				// include link to individual page for 'more'
-			htmldata += "<td class='er_t_i'><a href='#' onclick='editCatE(" + 
-							data[i]['type_id'] + ")'>(edit)</a></td>";
-			htmldata += "</tr>";
+			htmldata += lineTypes(data,i);
 		}
 	}
+	return htmldata;
+}
+
+/**
+ * function to display category lines.
+ * @param data is returned data array
+ * @param i is index to display
+ * @return html data for category line.
+ */
+function lineTypes(data,i) {
+	let htmldata = "" ;
+	htmldata += "<tr>";
+	htmldata += "<td id='tid" + data[i]['type_id'] + "'><a href='#' onclick='showPageE(" + data[i]['type_id'] + ")'>" + data[i]['type_id']  + "</a></td>" +
+					"<td>" + addSelectE(data[i]['type_id'],data[i]['category']) + "</td>" +
+					"<td><input type='text' id='title" + data[i]['type_id'] + "' name='title" + data[i]['type_id'] +"' value='" + data[i]['title'] + "'></td>" +
+					"<td><textarea id='desc" + data[i]['type_id'] + "' name='desc" + data[i]['type_id'] +"' rows='10' cols='30'>" + data[i]['description'] + "</textarea></td>" +
+					"<td><input type='text' id='image" + data[i]['type_id'] + "' name='image" + data[i]['type_id'] +"' value='" + data[i]['image'] + "'></td>" +
+					"<td><input type='text' id='rate" + data[i]['type_id'] + "' name='rate" + data[i]['type_id'] + "' value='" + data[i]['rate'] + "'></td>" +
+					"<td><input type='text' id='frw"  + data[i]['type_id'] + "' name='frw"  + data[i]['type_id'] + "' value='" ;
+	data[i]['reserve_with_array'].forEach(function(entry) {
+		htmldata+= entry + "," ;
+	});
+	htmldata += "'></td>" ;
+	htmldata += "<td><a href='#' onclick='modType(" + 
+				data[i]['type_id'] + ")'>" + "Update" + "</a></td>";
+	htmldata += "</tr>";
 	return htmldata;
 }
 
@@ -81,30 +99,19 @@ function writeLinesE(data,cat) {
  * @return htmldata for individual item page
  * @return
  */
-function writeItemE(data,i,cat) {
+function writeItemE(i) {
+	let data = itemData;
 	let htmldata = "";
-	htmldata += "<br><h2>" + data[i]['title'] + "</h2>" ;
-	htmldata += "<img src='" + data[i]['image'] + "'>" ;	
-	htmldata += "<p>" + data[i]['description'] + "</p><br>" ;
-	htmldata += "<p><strong>3 Day Price:</strong> $" + 
-		data[i]['rate'] + "</p>" ;
-	htmldata += "<p><strong>Extra Day Price:</strong> $" + 
-		data[i]['day_rate'] + "</p>" ;
-	htmldata += "<p><strong>Number Available:</strong> " + 
-		data[i]['availability'] + "</p>" ;
-	if ( data[i]['reserve_with_array'].length > 0) { //frequently rented array, if it exists
-		htmldata += "<p><strong>Frequently Rented With:</strong></p>";
-		data[i]['reserve_with_array'].forEach(function(entry) {
-			let indT = findTid(data,entry);	// find frequently rented item
-			htmldata += "<p>" + "<a href='#' onclick='showPageE("
-                                + indT + ",\"" + cat + "\")'>" +
-								data[indT]['title'] + "</a></p>";
-		});
-		htmldata += "<br>";
-	}
-	htmldata += "<button class='er_button' onclick='cookRes(" + 
-		data[i]['type_id'] + ")'>Add to Reservation</button>";
-	// onclick adds to cookie 
+	htmldata += "<tr>";
+	htmldata += "<td id='tid'>" + data[i]['iid'] + "</td>" +
+					"<td>" + addSelectT(data[i]['iid'],data[i]['tid']) + "</td>" +
+					"<td><input type='text' id='inventory" + data[i]['iid'] + "' name='inventory" + data[i]['iid'] +"' value='" + data[i]['inventory'] + "'></td>" +
+					"<td><input type='text' id='satellite_id" + data[i]['iid'] + "' name='satellite_id" + data[i]['iid'] +"' value='" + data[i]['satellite_id'] + "'></td>" +
+					"<td><input type='text' id='status" + data[i]['iid'] + "' name='status" + data[i]['iid'] + "' value='" + data[i]['status'] + "'></td>" +
+					"<td><input type='text' id='active"  + data[i]['iid'] + "' name='active"  + data[i]['iid'] + "' value='" + data[i]['active'] + "'></td>" ;
+	htmldata += "<td><a href='#' onclick='modItem(" + 
+				data[i]['iid'] + ")'>" + "Update" + "</a></td>";
+	htmldata += "</tr>";
 	return htmldata;
 }
 
@@ -114,35 +121,8 @@ function writeItemE(data,i,cat) {
  * uses fuzzysort
  */
 function erSearchE(value) {
-//	alert("Search for " + value);
     if(event.key === 'Enter') {
-		searchTerm = value ; // save searched value to return to search
-		const options2 = {
-		limit: 10, // don't return more results than you need!
-		threshold: -10000, // don't return bad results
-
-		keys: ['title', // fields to search, title & description
-				'desc']
-		}
-		const result2 = fuzzysort.go(value,listOfObjects,options2);
-	
-		let darray = [] ; // empty array for result indices
-		if ( result2['total'] != 0 ) { // number of returned results
-			for (var rkey in result2) {
-				if (rkey != "total") { // there's one final rkey that's not data
-					var rscore = result2[rkey]['score'] ; // get search score
-					if ( rscore > -200) { // good result - 200 seems right
-						let bkey = result2[rkey]['obj']['key'] ; // index into data array
-						let sString = retData[bkey]['title'];
-						console.log("Score " + rkey + " = " + rscore + " " + 
-							"key is " + result2[rkey]['obj']['key'] + " Title is " + 
-							sString);
-						let htmldata  = "<div id=er_searcho><br><h2>Search Results</h2><br></div>";
-						darray.push(bkey);
-					}
-				}
-			}
-		}
+		let darray = realSearch(value);
 		outSearchE(retData,darray);	// display search results page
 	}
 }
@@ -155,28 +135,12 @@ function erSearchE(value) {
 function outSearchE(data,darr) {
 	let htmldata  = "<div id=er_searcho><br><h2>Search Results</h2><br></div>";
 	if (darr.length > 0) { // if results
-		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
+
+		htmldata += "<table class='er_table'><tr><th>TypeID</th><th>Category</th><th>Title</th><th>Description</th><th>Image</th><th>3 Day Rate</th><th>Rented With</th><th>Update</th></tr>";
 		darr.forEach(function(entry) {
-			htmldata += "<tr>";
-			htmldata += "<td class='er_t_i'>" + "<a href='#' onclick='showPageE("
-                                + entry + ",\"Search\"" + ")'>" +
-				data[entry]['title'] + "</a></td>"; // onclick to show individual pages
-			htmldata += "<td class='er_t_i'><img class='er_thumb' src='" + 
-				data[entry]['image'] + "'></td>";
-			let sstr = data[entry]['description'].substring(0, 500)
-			htmldata += "<td>" + sstr + 
-				"<a href='#' onclick='showPageE(" + entry + ",\"Search\"" + ")'> ...more" + "</a></td>";
-				// for description, only show first 500 characters, 
-				// include link to individual page for 'more'
-			htmldata += "<td class='er_t_i'>$" + data[entry]['rate'] + "</td>";
-			htmldata += "<td class='er_t_i'>$" + data[entry]['day_rate'] + "</td>";
-			htmldata += "<td class='er_t_i'>" + data[entry]['availability'] + "</td>";
-			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
-							data[entry]['type_id'] + ")'><img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/plus.png'></td>";
-			htmldata += "</tr>";
+			htmldata += lineTypes(data,entry);
 		});
 		htmldata += "</table>";
-		htmldata += "<h4>* Add item to reservation.</h4>";
 	}
 	else {
 		htmldata+= "<strong>No Results Found</strong>";
@@ -191,9 +155,120 @@ function outSearchE(data,darr) {
  */
 function editCatE(i,cat) {
 	alert("item is " + i);
-	let htmldata = writeItemE(retData,i,cat);
+	let htmldata = writeItemE(i);
 	htmldata += "<br><button class='er_button' onclick='showCatE(\"" + 
 		cat + "\")'>Return to " + cat + " Page</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
 }
 
+/**
+ * function to create category select
+ * @param number is added to id and name to create unique select
+ * @param selected is item selected
+ * @return select 
+ */
+function addSelectE(number,selected) {
+	let htmldata = "";
+	htmldata += "<select name='er_sel" + number + "' id='er_sel" + number + "'>";
+	catData.forEach(function(cat) {
+		if ( cat['active'] == 1) {
+			htmldata += "<option value='" + cat['cid'] + "'"
+			if ( selected == cat['name'] ) {
+				htmldata+= " selected" ;
+			}
+			htmldata += ">" + cat['name'] + "</option>";
+		}
+	});
+
+	htmldata += "</select>";
+	return htmldata;
+}
+
+/**
+ * function to create type select
+ * @param number is added to id and name to create unique select
+ * @param selected is item selected
+ * @return select 
+ */
+function addSelectT(number,selected) {
+	let htmldata = "";
+	htmldata += "<select name='er_selt" + number + "' id='er_selt" + number + "'>";
+	retData.forEach(function(type) {
+		if ( type['active'] == 1) {
+			htmldata += "<option value='" + type['type_id'] + "'"
+			if ( selected == type['type_id'] ) {
+				htmldata+= " selected" ;
+			}
+			htmldata += ">" + type['title'] + "</option>";
+		}
+	});
+
+	htmldata += "</select>";
+	return htmldata;
+}
+
+/**
+ * function to upload changed Items
+ * @param it is item id
+ */
+async function modType(i) {
+	let id  = "er_selt" + i;
+	let sel = document.getElementById(id);
+	let type = sel.options[sel.selectedIndex].value; // type
+	let inventory = document.getElementById('inventory'+i).value ;
+	let satellite_id = document.getElementById('satellite_id'+i).value ;
+	let status = document.getElementById('status'+i).value ;
+	let active = document.getElementById('active'+i).value ;
+	alert(i + ", " + type + ", " + inventory + ", " + satellite_id + ", " + status + ", " + active );
+	var itemary = {};
+	itemary['id'] = i;
+	itemary['tid'] = type;
+	itemary['inventory'] = inventory;
+	itemary['satellite_id'] = satellite_id;
+	itemary['status'] = status;
+	itemary['active'] = active;
+	let json_str = (JSON.stringify(itemary)); // encodeURI not work
+	let url = 'https://satellite.communitytv.org/erental.php?command=upItem';
+//	let response = await postData(json_str,url);
+}
+
+/**
+ * function to upload changed Items
+ * @param it is item id
+ */
+async function modItem(i) {
+	let id  = "tid" + i;
+	let sel = document.getElementById(id);
+	let cat = sel.options[sel.selectedIndex].value; // category
+	let title = document.getElementById('title'+i).value ;
+	let desc = document.getElementById('desc'+i).value ;
+	let image = document.getElementById('image'+i).value ;
+	let rate = document.getElementById('rate'+i).value ;
+	let frw = document.getElementById('frw'+i).value ;
+	alert(i + ", " + cat + ", " + title + ", " + desc + ", " + image + ", " + rate + ", " + frw);
+	var itemary = {};
+	itemary['id'] = i;
+	itemary['cat'] = cat;
+	itemary['title'] = title;
+	itemary['desc'] = desc;
+	itemary['image'] = image;
+	itemary['rate']   = rate;
+	itemary['frw'] = frw;
+	let json_str = (JSON.stringify(itemary)); // encodeURI not work
+	let url = 'https://satellite.communitytv.org/erental.php?command=upItem';
+	let response = await postData(json_str,url);
+}
+
+/**
+ * function to find index from tid in data array
+ * @param data is returned data array
+ * @param index is index into array
+ * @return id j
+ */
+function findIndex(data,index) {
+	for (let i = 0; i < data.length; i++) { // search entire array until found
+		if (data[i]['type_id'] == index) {
+			return i;
+		}
+	}
+}

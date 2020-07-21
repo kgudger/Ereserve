@@ -83,6 +83,7 @@ EOT;
   $retpage .= <<<EOT
 </ul></div>
 <div id='er_display'>
+< Home <- You Are Here<br>
 <br><h3>Instructions</h3>Browse our equipment by category by clicking below 
 or on the banner above. Select equipment to add to your cart then check out 
 with "View Your Cart". You can search for items using the Search box above. Thanks.

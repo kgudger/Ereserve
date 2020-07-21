@@ -60,10 +60,8 @@ ul.topnav {
 }
 
 .er_image {
-	/* width: 10%; 
-	max-width: 300px;
-	max-height:500px;
-	height:auto;*/
+    width: 50%;
+    min-width: 200px;
 }
 
 .er_block {
