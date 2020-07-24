@@ -171,18 +171,80 @@ class DB
 		$result['reservation'] = $lastId;
 		echo json_encode($result);
 	}
-// postItem
-	function postItem($json) {
+// postType
+	function postType($json) {
 		$result = array(); // result of operation
 		$frw    = array(); // array of items of type 'ritems'
 		
-		$itemid = $json['id']; // tid
-		$cid = $json['cat']; // category #
-		$title = $json['title']; // title
-		$description = $json['desc']; // description
-		$image = $json['image']; // image url
-		$rate  = $json['rate']; // rate
-		$frw   = explode("," , $json['frw']); // frequently rented with string -> array
+		$typeid  = $json['id']; // tid
+		$cid     = $json['cat']; // category #
+		$title   = $json['title']; // title
+		$descrip = $json['desc']; // description
+		$image   = $json['image']; // image url
+		$rate    = $json['rate']; // rate
+		$frw     = explode("," , $json['frw']); // frequently rented with string -> array
+
+		if ( empty($typeid) ) { // get last tid, increment
+			$sql = "SELECT MAX(tid) AS max FROM Types";
+			$stmt = $this->db->query($sql);
+			$tid  = $stmt->fetch();
+			$typeid = $tid['max'] + 1 ; // increment
+		}
+		$sql = "INSERT INTO `Types` 
+				VALUES(  ? , ? , ? , ? , ? , 1, ? )
+				ON DUPLICATE KEY UPDATE
+				`cid` = ? , `title` = ?, `description` = ?,
+				`image` = ? , `rate` = ?";
+
+		$stmt = $this->db->prepare($sql);
+		$stmt->execute(array($typeid,$cid,$title,$descrip,$image,$rate,
+							  $cid,$title,$descrip,$image,$rate));
+		
+		if ( !(empty($frw)) ) { // first delete all old ones
+			$sql = "DELETE FROM `frequently_rented_with` WHERE `tid` = ?" ;
+			$stmt = $this->db->prepare($sql);
+			$resp = $stmt->execute(array($typeid)); // delete all
+			foreach ($frw as $value) {
+				if ( !empty($value) ) {
+					$sql = "INSERT INTO `frequently_rented_with`
+							(`tid`, `fr_tid`)
+							VALUES ( ? , ? )" ;
+					$stmt = $this->db->prepare($sql);
+					$resp = $stmt->execute(array($typeid,$value)); // add 1 at a time
+				}
+			}	
+		}
+		
+		$result['status'] = "OK";
+		echo json_encode($result);
+	}
+// postItem
+	function postItem($json) {
+		$result = array(); // result of operation
+		
+		$itemid = $json['id']; // iid
+		$tid    = $json['tid']; // type_id
+		$invent = $json['inventory']; // inventory #
+		$sateid = $json['satellite_id']; // description
+		$status = $json['status']; // status
+		$active = $json['active']; // active
+		
+		if ( empty($itemid) ) { // get last iid, increment
+			$sql = "SELECT MAX(iid) AS max FROM Items";
+			$stmt = $this->db->query($sql);
+			$iid  = $stmt->fetch();
+			$itemid = $iid['max'] + 1 ; // increment
+		}
+		$sql = "INSERT INTO `Items` 
+				VALUES(  ? , ? , ? , ? , ? , ? )
+				ON DUPLICATE KEY UPDATE
+				`tid` = ? , `inventory` = ?, `satellite_id` = ?,
+				`status` = ? , `active` = ?";
+
+		$stmt = $this->db->prepare($sql);
+		$stmt->execute(array($itemid,$tid,$invent,$sateid,$status,$active,
+							  $tid,$invent,$sateid,$status,$active));
+		
 		$result['status'] = "OK";
 		echo json_encode($result);
 	}

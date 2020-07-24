@@ -101,10 +101,11 @@ if ($overdays > 0) {
 
 echo <<<EOT
 <table class='blueTable'>
-<tr><th>Item</th><th>3 day Cost</th><th>Days Rented</th><th>Extended Cost</th></tr>
+<tr><th>Item</th><th>Inventory Tag</th><th>3 day Cost</th><th>Days Rented</th><th>Extended Cost</th></tr>
 EOT;
 
-$sql = "SELECT Types.title AS title, Types.rate AS rate
+$sql = "SELECT Types.title AS title, Types.rate AS rate,
+		Items.inventory AS inventory
 		FROM reservation_detail AS detail,
 			Items, Types
    		WHERE detail.rid = ?
@@ -115,15 +116,16 @@ $stmt->execute(array($resId));
 while($row  = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	$title = $row['title'];
 	$rate  = $row['rate'];
+	$inven = $row['inventory'];
 	$icost = $rate * $factor ;
-	echo "<tr><td>" . $title . "</td><td>$" . $rate . "</td><td>" . 
+	echo "<tr><td>" . $title . "</td><td>" . $inven . "</td><td>$" . $rate . "</td><td>" . 
 		$daysrented . "</td><td>$" . number_format(($icost),2) . 
 		"</td></tr>";
 	$cost+= $icost;
 }
 
 $totalcost = number_format($cost,2);
-echo "<tr><td><strong>Total cost</strong></td><td></td><td></td><td>$" . 
+echo "<tr><td><strong>Total cost</strong></td><td></td><td></td><td></td><td>$" . 
 		$totalcost . "</td></tr></table>";
 
 echo <<<EOT

@@ -19,6 +19,9 @@ if ( is_array($_REQUEST) && count($_REQUEST) ) {
   } else if ($command == "upItem") {
 	$data = json_decode(file_get_contents('php://input'), true);
 	echo $db->postItem($data);
+  } else if ($command == "upType") {
+	$data = json_decode(file_get_contents('php://input'), true);
+	echo $db->postType($data);
   }
   else
     echo "command was not recognized";

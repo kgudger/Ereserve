@@ -10,6 +10,9 @@
  * @package    ERental
  *
  */
+ 
+var bignumber = 9999; // a big number for ids in page;
+
 
 /**
  * function to sort and display Categories
@@ -24,6 +27,17 @@ function showCatE(cat) {
 		let htmldata  = "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
 		htmldata += "<table class='er_table'><tr><th>TypeID</th><th>Category</th><th>Title</th><th>Description</th><th>Image</th><th>3 Day Rate</th><th>Rented With</th><th>Update</th></tr>";
 		htmldata += writeLinesE(retData,cat);
+		htmldata += "<tr>";
+		htmldata += "<td></td>" + // blank for tid
+					"<td>" + addSelectE(bignumber,0) + "</td>" + // select with nothing selected?
+					"<td><input type='text' id='title" + bignumber + "' name='title" + bignumber + "' value=''></td>" +
+					"<td><textarea id='desc"           + bignumber + "' name='desc"  + bignumber + "' rows='10' cols='30'></textarea></td>" +
+					"<td><input type='text' id='image" + bignumber + "' name='image" + bignumber + "' value=''></td>" +
+					"<td><input type='text' id='rate"  + bignumber + "' name='rate"  + bignumber + "' value=''></td>" +
+					"<td><input type='text' id='frw"   + bignumber + "' name='frw "  + bignumber + "' value=''></td>" ;
+		htmldata += "<td><a href='#' onclick='modType(" + 
+					bignumber + ")'>" + "Update" + "</a></td>";
+		htmldata += "</tr>";
 		htmldata += "</table>";
 		document.getElementById("er_display").innerHTML = htmldata;
 	}
@@ -43,6 +57,16 @@ function showPageE(i) {
 			htmldata += writeItemE(j);
 		}
 	}
+	htmldata += "<tr>";
+	htmldata += "<td></td>" + // blank item id, will be assigned on insert
+				"<td>" + addSelectT(bignumber,0) + "</td>" +
+				"<td><input type='text' id='inventory"    + bignumber + "' name='inventory"    + bignumber + "' value=''></td>" +
+				"<td><input type='text' id='satellite_id" + bignumber + "' name='satellite_id" + bignumber + "' value=''></td>" +
+				"<td><input type='text' id='status"       + bignumber + "' name='status"       + bignumber + "' value=''></td>" +
+				"<td><input type='text' id='active"       + bignumber + "' name='active"       + bignumber + "' value=''></td>" ;
+	htmldata += "<td><a href='#' onclick='modItem(" + 
+				bignumber + ")'>" + "Update" + "</a></td>";
+	htmldata += "</tr>";
 	htmldata += "</table>";
 	document.getElementById("er_display").innerHTML = htmldata;
 }
@@ -169,7 +193,7 @@ function editCatE(i,cat) {
  */
 function addSelectE(number,selected) {
 	let htmldata = "";
-	htmldata += "<select name='er_sel" + number + "' id='er_sel" + number + "'>";
+	htmldata += "<select name='er_selt" + number + "' id='er_selt" + number + "'>";
 	catData.forEach(function(cat) {
 		if ( cat['active'] == 1) {
 			htmldata += "<option value='" + cat['cid'] + "'"
@@ -211,7 +235,7 @@ function addSelectT(number,selected) {
  * function to upload changed Items
  * @param it is item id
  */
-async function modType(i) {
+async function modItem(i) {
 	let id  = "er_selt" + i;
 	let sel = document.getElementById(id);
 	let type = sel.options[sel.selectedIndex].value; // type
@@ -219,25 +243,37 @@ async function modType(i) {
 	let satellite_id = document.getElementById('satellite_id'+i).value ;
 	let status = document.getElementById('status'+i).value ;
 	let active = document.getElementById('active'+i).value ;
-	alert(i + ", " + type + ", " + inventory + ", " + satellite_id + ", " + status + ", " + active );
-	var itemary = {};
-	itemary['id'] = i;
-	itemary['tid'] = type;
-	itemary['inventory'] = inventory;
-	itemary['satellite_id'] = satellite_id;
-	itemary['status'] = status;
-	itemary['active'] = active;
-	let json_str = (JSON.stringify(itemary)); // encodeURI not work
-	let url = 'https://satellite.communitytv.org/erental.php?command=upItem';
-//	let response = await postData(json_str,url);
+	if (confirm(i + ", " + type + ", " + inventory + ", " + satellite_id + ", " + status + ", " + active )) {
+		var itemary = {};
+		itemary['id'] = (i == bignumber) ? "" : i ; // item id, null for update
+		itemary['tid'] = type;
+		itemary['inventory'] = inventory;
+		itemary['satellite_id'] = satellite_id;
+		itemary['status'] = status;
+		itemary['active'] = active;
+		let json_str = (JSON.stringify(itemary)); // encodeURI not work
+		let url = 'https://satellite.communitytv.org/erental.php?command=upItem';
+		let response = await postData(json_str,url);
+		if (response['status'] == "OK") {
+			// get data array again
+			fetchRecs();
+			let iid = findItem(itemData,i) ; // get type id
+			showPageE(iid) ;
+		} else {
+			alert("Update Item Failed " + toString(response['error']));
+		}
+	} else {
+  // Do nothing!
+		alert("Update Item Cancelled");
+	}
 }
 
 /**
- * function to upload changed Items
+ * function to upload changed Types
  * @param it is item id
  */
-async function modItem(i) {
-	let id  = "tid" + i;
+async function modType(i) {
+	let id  = "er_selt" + i;
 	let sel = document.getElementById(id);
 	let cat = sel.options[sel.selectedIndex].value; // category
 	let title = document.getElementById('title'+i).value ;
@@ -245,18 +281,30 @@ async function modItem(i) {
 	let image = document.getElementById('image'+i).value ;
 	let rate = document.getElementById('rate'+i).value ;
 	let frw = document.getElementById('frw'+i).value ;
-	alert(i + ", " + cat + ", " + title + ", " + desc + ", " + image + ", " + rate + ", " + frw);
-	var itemary = {};
-	itemary['id'] = i;
-	itemary['cat'] = cat;
-	itemary['title'] = title;
-	itemary['desc'] = desc;
-	itemary['image'] = image;
-	itemary['rate']   = rate;
-	itemary['frw'] = frw;
-	let json_str = (JSON.stringify(itemary)); // encodeURI not work
-	let url = 'https://satellite.communitytv.org/erental.php?command=upItem';
-	let response = await postData(json_str,url);
+	if (confirm(i + ", " + cat + ", " + title + ", " + desc + ", " + image + ", " + rate + ", " + frw)) {
+		var itemary = {};
+		itemary['id'] = (i == bignumber) ? "" : i ; // type id, null for update
+		itemary['cat'] = cat;
+		itemary['title'] = title;
+		itemary['desc'] = desc;
+		itemary['image'] = image;
+		itemary['rate']   = rate;
+		itemary['frw'] = frw;
+		let json_str = (JSON.stringify(itemary)); // encodeURI not work
+		let url = 'https://satellite.communitytv.org/erental.php?command=upType';
+		let response = await postData(json_str,url);
+		if (response['status'] == "OK") {
+			// get data array again
+			fetchRecs();
+			let cattext = findCat(catData,cat) ; // get category text
+			showCatE(cattext) ;
+		} else {
+			alert("Update Type Failed " + toString(response['error']));
+		}
+	} else {
+  // Do nothing!
+		alert("Update Type Cancelled");
+	}
 }
 
 /**
@@ -269,6 +317,34 @@ function findIndex(data,index) {
 	for (let i = 0; i < data.length; i++) { // search entire array until found
 		if (data[i]['type_id'] == index) {
 			return i;
+		}
+	}
+}
+
+/**
+ * function to find category from catData
+ * @param data is returned catData array
+ * @param j is cid
+ * @return Category for cid j
+ */
+function findCat(data,j) {
+	for (let i = 0; i < data.length; i++) { // search entire array until found
+		if (data[i]['cid'] == j) { // 0 based index
+			return data[i]['name'];
+		}
+	}
+}
+
+/**
+ * function to find item from itemData
+ * @param data is returned itemData array
+ * @param j is iid
+ * @return Item tid for iid j
+ */
+function findItem(data,j) {
+	for (let i = 0; i < data.length; i++) { // search entire array until found
+		if (data[i]['iid'] == j) { // 0 based index
+			return data[i]['tid'];
 		}
 	}
 }
