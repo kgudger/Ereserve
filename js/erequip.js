@@ -62,8 +62,8 @@ function showPageE(i) {
 				"<td>" + addSelectT(bignumber,0) + "</td>" +
 				"<td><input type='text' id='inventory"    + bignumber + "' name='inventory"    + bignumber + "' value=''></td>" +
 				"<td><input type='text' id='satellite_id" + bignumber + "' name='satellite_id" + bignumber + "' value=''></td>" +
-				"<td><input type='text' id='status"       + bignumber + "' name='status"       + bignumber + "' value=''></td>" +
-				"<td><input type='text' id='active"       + bignumber + "' name='active"       + bignumber + "' value=''></td>" ;
+				"<td>" + addStatSel(bignumber,0) + "</td>" +
+				"<td>" + addActiveSel(bignumber,1) + "</td>" ;
 	htmldata += "<td><a href='#' onclick='modItem(" + 
 				bignumber + ")'>" + "Update" + "</a></td>";
 	htmldata += "</tr>";
@@ -131,8 +131,8 @@ function writeItemE(i) {
 					"<td>" + addSelectT(data[i]['iid'],data[i]['tid']) + "</td>" +
 					"<td><input type='text' id='inventory" + data[i]['iid'] + "' name='inventory" + data[i]['iid'] +"' value='" + data[i]['inventory'] + "'></td>" +
 					"<td><input type='text' id='satellite_id" + data[i]['iid'] + "' name='satellite_id" + data[i]['iid'] +"' value='" + data[i]['satellite_id'] + "'></td>" +
-					"<td><input type='text' id='status" + data[i]['iid'] + "' name='status" + data[i]['iid'] + "' value='" + data[i]['status'] + "'></td>" +
-					"<td><input type='text' id='active"  + data[i]['iid'] + "' name='active"  + data[i]['iid'] + "' value='" + data[i]['active'] + "'></td>" ;
+					"<td>" + addStatSel(data[i]['iid'],data[i]['status']) + "</td>" +
+					"<td>" + addActiveSel(data[i]['iid'],data[i]['active']) + "</td>" ;
 	htmldata += "<td><a href='#' onclick='modItem(" + 
 				data[i]['iid'] + ")'>" + "Update" + "</a></td>";
 	htmldata += "</tr>";
@@ -232,6 +232,50 @@ function addSelectT(number,selected) {
 }
 
 /**
+ * function to create status select
+ * @param number is added to id and name to create unique select
+ * @param selected is item selected
+ * @return select 
+ */
+function addStatSel(number,selected) {
+	let htmldata = "";
+	htmldata += "<select name='er_stats" + number + "' id='er_stats" + number + "'>";
+	statusData.forEach(function(type) {
+		htmldata += "<option value='" + type['sid'] + "'"
+		if ( selected == type['sid'] ) {
+			htmldata+= " selected" ;
+		}
+		htmldata += ">" + type['status'] + "</option>";
+	});
+	htmldata += "</select>";
+	return htmldata;
+}
+
+/**
+ * function to create active select
+ * @param number is added to id and name to create unique select
+ * @param selected is item selected
+ * @return select 
+ */
+function addActiveSel(number,selected) {
+	let htmldata = "";
+	htmldata += "<select name='er_act" + number + "' id='er_act" + number + "'>";
+	htmldata += "<option value='0'"
+	if ( selected == 0 ) {
+			htmldata+= " selected" ;
+	}
+	htmldata += ">" + 0 + "</option>";
+	htmldata += "<option value='1'"
+	if ( selected == 1 ) {
+			htmldata+= " selected" ;
+	}
+	htmldata += ">" + 1 + "</option>";
+
+	htmldata += "</select>";
+	return htmldata;
+}
+
+/**
  * function to upload changed Items
  * @param it is item id
  */
@@ -241,8 +285,10 @@ async function modItem(i) {
 	let type = sel.options[sel.selectedIndex].value; // type
 	let inventory = document.getElementById('inventory'+i).value ;
 	let satellite_id = document.getElementById('satellite_id'+i).value ;
-	let status = document.getElementById('status'+i).value ;
-	let active = document.getElementById('active'+i).value ;
+	sel = document.getElementById('er_stats'+i) ;
+	let status = sel.options[sel.selectedIndex].value ; // status
+	sel = document.getElementById('er_act'+i) ;
+	let active = sel.options[sel.selectedIndex].value ; // active
 	if (confirm(i + ", " + type + ", " + inventory + ", " + satellite_id + ", " + status + ", " + active )) {
 		var itemary = {};
 		itemary['id'] = (i == bignumber) ? "" : i ; // item id, null for update

@@ -86,7 +86,9 @@ EOT;
 < Home <- You Are Here<br>
 <br><h3>Instructions</h3>Browse our equipment by category by clicking below 
 or on the banner above. Select equipment to add to your cart then check out 
-with "View Your Cart". You can search for items using the Search box above. Thanks.
+with "View Your Cart". You can search for items using the Search box above. 
+If you want to return to a page or a search, please use the "breadcrumbs" above. 
+<strong>The browser back button will not work.</strong> Thanks.
 EOT;
   foreach ($cats as $key => $img) {
 	  $retpage .= "<div class='er_block'><br><br><a href='#' onclick='showCat(\"" . $key . "\")'><h2>" . $key . "</h2>";

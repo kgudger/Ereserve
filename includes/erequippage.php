@@ -55,6 +55,7 @@ EOT;
   	  }  
   } 
   $retpage .= "</ul></div>"; // er_menu
+  $retpage .= "<div><a href='https://satellite.communitytv.org/wp-content/plugins/Ereserve/includes/sat_index.php'>Satellite Cross Check</a></div>";
   $retpage .= "<div id='er_display'>";  
   $retpage .= "</div>"; // er_display
   $retpage .= "</div>"; // er_main
