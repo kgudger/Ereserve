@@ -59,14 +59,17 @@ table.blueTable thead th:first-child {
 <div>
 <h1>CTV / Satellite Cross Check</h1>
 <table class='blueTable'>
-<tr><th>Satellite ID</th><th>Satellite Title</th><th>CTV Inventory #</th></tr>
+<tr><th>Satellite ID</th><th>Satellite Title</th><th>CTV Title</th><th>CTV Inventory #</th></tr>
 EOT;
 
 $id_array = array();	// store satellite data here.
-$sql = "SELECT inventory, satellite_id FROM `Items`";
+$sql = "SELECT inventory, satellite_id,
+			Types.title AS title
+		FROM `Items`, `Types`
+		WHERE Types.tid = Items.tid";
 $stmt = $db->query($sql);
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-	$id_array[$row['satellite_id']] = $row['inventory'];
+	$id_array[$row['satellite_id']] = array($row['inventory'],$row['title']);
 }
 //print_r($id_array);
 $ch = satellite_startApi($uname,$pword);
@@ -79,14 +82,15 @@ if ( is_array($ch) ) { // there was an error
 
     foreach ( $ndata as $sat_data ) {
 		if (1 /* !array_key_exists(intval($sat_data['id']),
-				$id_array) /*&&
+	                                        			$id_array) /*&&
 				$sat_data['whoCannotReserve']['nonMember']!='1'*/) {
 			$out1 .= '<tr><td>' . $sat_data['id'] . '</td>' 
 					.'<td>' . $sat_data['name'] . '</td>' ;
 			if ( !array_key_exists(intval($sat_data['id']), $id_array ) ) {
-				$out1 .= '<td></td>';
+				$out1 .= '<td></td><td></td>';
 			} else {
-				$out1 .= '<td>' . $id_array[intval($sat_data['id'])] . '</td>' ;
+				$out1 .= '<td>' . $id_array[intval($sat_data['id'])][1] . '</td>' ;
+				$out1 .= '<td>' . $id_array[intval($sat_data['id'])][0] . '</td>' ;
 			}
 			$out1 .= '</tr>' ;
         }

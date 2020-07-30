@@ -98,6 +98,8 @@ function showContent($title, &$uid) {
   $retpage = "";
 
 //	echo $this->formL->reportErrors();
+	$retpage .= "<a href='https://satellite.communitytv.org/wp-content/plugins/Ereserve/includes/pie.php'>" ;
+	$retpage .= "<button>Pie Charts!</button></a><br><br>";
 	$retpage .= $this->formL->start('POST', "/equipment-reservation-administration", 'name="E Admin"');
 	$retpage .= "<h4>All active reservations and all reservations ending after below date.</h4>";
 	$date = date("Y-m-d");
@@ -116,12 +118,31 @@ function showContent($title, &$uid) {
 		$sql = "SELECT id, status, name, date1, date2 
 				FROM `reservations`";
 		$result = $this->db->query($sql);
-		$retpage .= "<table><tr><th>Name</th><th>Start</th><th>Stop</th><th>Status</th><th>Contract</th></tr>";
+		$retpage .= "<table><tr><th>Name</th><th>Start</th><th>Stop</th><th>Status</th><th>Gear</th><th>Contract</th></tr>";
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			if ( ($row['status'] > 0) || ($row['date2'] >= $sDate) ) {
 				$retpage .= "<tr><td>" . $row['name'] . "</td><td>" . $row['date1'] . "</td>" ;
 				$retpage .= "<td>" . $row['date2'] . "</td>";
 				$retpage .= "<td>" . $this->formL->makeSelect("stat" . $row['id'], $statarray, $row['status']) . "</td>";
+				$retpage .= "<td><table><tr><th>Name</th><th>Inventory</th><th>Status</th></tr>" ;
+				$sql = "SELECT Items.status AS status,
+							Types.title AS name,
+							Items.inventory as inventory,
+							Items.iid AS iid
+						FROM reservation_detail AS RD,
+							Types, Items
+						WHERE Types.tid = Items.tid
+							AND RD.item_id = Items.iid
+							AND RD.rid = " . $row['id'];
+				$res2 = $this->db->query($sql);
+				while ($row2 = $res2->fetch(PDO::FETCH_ASSOC)) {
+					$retpage .= "<tr><td>" . $row2['name'] . "</td><td>" . 
+						$row2['inventory'] . "</td><td>" .
+						$this->formL->makeSelect("stat" . $row['id'] . "-" . $row2['iid'], $statarray, $row2['status']) .
+//						array_search($row2['status'], $statarray) . 
+						"</td></tr>";
+				}
+				$retpage .= "</table></td>";
 				$retpage .= "<td><a href='https://satellite.communitytv.org/wp-content/plugins/Ereserve/includes/contract.php?reservation=". $row['id'] . "'><img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/plus.png'></a></td></tr>" ;
 			} // only display these dates
 		}
