@@ -134,7 +134,13 @@ class DB
 				echo json_encode($result);
 				return;
 			}
-			$itema[$type] = $row['iid']; // array linking type to item to reserve
+			$itema[] = $row['iid']; // array linking type to item to reserve
+		// now update each item to the "In Process" status
+			$sql = "UPDATE `Items` 
+					SET `status` = 1
+					WHERE `iid` = ?";
+			$stmta = $this->db->prepare($sql);
+			$stmta->execute(array($row['iid']));
 		} // if we're still going, found all items
 		$wname  = $json['wname']; // whole name
 		$phone  = $json['phone'];
@@ -151,18 +157,10 @@ class DB
 							 $starttime,$endtime));
 		$lastId = $this->db->lastInsertId();
 
-		foreach ( $ritems as $value ) { // put reserved items into detail table
+		foreach ( $itema as $value ) { // put reserved items into detail table
 			$sql = "INSERT INTO `reservation_detail`
 						(`rid`, `item_id`, `status`)
 						VALUES($lastId, ? , 1)"; // status 1 is in process
-			$stmt = $this->db->prepare($sql);
-			$stmt->execute(array($itema[$value]));
-		}
-		// now update each item to the "In Process" status
-		foreach ($itema as $key => $value) {
-			$sql = "UPDATE `Items` 
-					SET `status` = 1
-					WHERE `iid` = ?";
 			$stmt = $this->db->prepare($sql);
 			$stmt->execute(array($value));
 		}

@@ -3,26 +3,31 @@
 * @file results.php
 * Purpose: Satellite API.
 *
-* @copyright  (c) 2016, Community Television of Santa Cruz County, all rights reserved
+* @copyright  (c) 2020, Community Television of Santa Cruz County, all rights reserved
 * @license    http://opensource.org/licenses/BSD-2-Clause
 * @author Keith Gudger
-* @version 1.0 08/18/16
+* @version 2.0 07/18/20
 *
 */
 
-require_once "/var/www/html/satellite/wp-content/plugins/Ereserve/dbstart.php";
+require_once "../dbstart.php";
+require_once "../includes/redirect.php";
   header('Content-type: text/html');
   header('Access-Control-Allow-Origin: *');
 
-//echo $_SERVER['REQUEST_URI'];
+//$db = new DB();
 
-$url_elements = explode('/', $_SERVER['REQUEST_URI']);
-
-$request = $url_elements[1] ;
-$bundle  = explode(".",$url_elements[2]);
-$bundle  = $bundle[0];
-$file = './urir.txt';
-file_put_contents($file, $_SERVER['REQUEST_URI'] . "\n" . $bundle);
+if ( is_array($_REQUEST) && count($_REQUEST) ) {
+  $command = $_REQUEST['command'];
+  if($command == "finishReservation") {
+//	$bundle = json_decode(file_get_contents('php://input'), true);
+	$bundle = $_REQUEST['bundle'];
+  } else {
+	$response = array("success" => false,'error'=>'Bad request.\r\n');
+	$response = json_encode($response);
+	http_response_code(400);
+  }
+}
 
 $sql = "SELECT status
 	FROM reservations
@@ -30,13 +35,9 @@ $sql = "SELECT status
 $stmt = $db->prepare($sql);
 $stmt->execute(array($bundle));
 $row = $stmt->fetch(PDO::FETCH_ASSOC);  // gets reservation status
-if ( $request != "reservation-results" ) {
-	$response = array("success" => false,'error'=>'Bad request.\r\n');
-	$response = json_encode($response);
-	http_response_code(400);
-} else if (empty($row)) { 
+if (empty($row)) { // if not, fail
 	$response = array("success" => false,
-		'error'=>'Reservation failed.\r\nWorkstation unit is not available.\r\n');
+		'error'=>'Reservation ' . $bundle . ' failed.\r\nWorkstation unit is not available.\r\n');
 	$response = json_encode($response);
 	http_response_code(400);
 } else   {
@@ -75,6 +76,5 @@ if ( $request != "reservation-results" ) {
 	$response = json_encode($send_data);
 }
 echo $response;
-$file = './response.txt';
-file_put_contents($file, $response);
 ?>
+

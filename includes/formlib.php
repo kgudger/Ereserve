@@ -264,7 +264,7 @@ class FormLib extends FormVerifier {
 	 * @return html for a date input field.
      */
     function makeDateInput($name,$value="",$other="") {
-        $value = $this->getValue($name, $value);
+		$value = $this->getValue($name, $value);
         $html="<input type=\"date\" name=\"$name\" value=\"$value\"";
         if ($other) $html .= " $other";
         $html .= ">";

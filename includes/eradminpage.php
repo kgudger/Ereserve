@@ -62,24 +62,26 @@ function processData(&$uid) {
 			$res = $this->db->prepare($sql);
 			$res->execute(array($stat,$rid)); // updates reservation table status
 
-			$sql = "UPDATE reservation_detail
-					SET status = ?
-					WHERE rid = ?";
-			$stmt = $this->db->prepare($sql);
-			$stmt->execute(array($stat,$rid)); // updates reservation detail status
-
 			$sql = "SELECT item_id 
 					FROM reservation_detail
 					WHERE rid = ?";
 			$stmt = $this->db->prepare($sql);
 			$stmt->execute(array($rid)); // reads from reservation detail
-			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				$item_id = $row['item_id'];
+			while ($row2 = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$item_id = $row2['item_id'];
+				$statitem = $this->formL->getValue("stat" . $row['id'] . "-" . $item_id);
 				$sql = "UPDATE Items
 					SET status = ?
 					WHERE iid = $item_id";
 				$res = $this->db->prepare($sql);
-				$res->execute(array($stat)); // updates item
+				$res->execute(array($statitem)); // updates item
+
+				$sql = "UPDATE reservation_detail
+						SET status = ?
+						WHERE rid = ? 
+						AND item_id = ?";
+				$res = $this->db->prepare($sql);
+				$res->execute(array($statitem,$rid,$item_id)); // updates reservation detail status
 			}
 //			fwrite($fp, 'id is' . $row['id'] . "status is " . $stat);  
 		}
@@ -98,7 +100,7 @@ function showContent($title, &$uid) {
   $retpage = "";
 
 //	echo $this->formL->reportErrors();
-	$retpage .= "<a href='https://satellite.communitytv.org/wp-content/plugins/Ereserve/includes/pie.php'>" ;
+	$retpage .= "<a href='https://satellite.communitytv.org/wp-content/plugins/Ereserve/EPie.php'>" ;
 	$retpage .= "<button>Pie Charts!</button></a><br><br>";
 	$retpage .= $this->formL->start('POST', "/equipment-reservation-administration", 'name="E Admin"');
 	$retpage .= "<h4>All active reservations and all reservations ending after below date.</h4>";

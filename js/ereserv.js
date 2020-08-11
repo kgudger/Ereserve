@@ -176,7 +176,7 @@ async function completeReservation() {
 		return;
 	}
 //	alert("Reservation Success!");
-	if (confirm('You are being redirected to the Satellite payment page\nwhere you  will need to log in or create an account.\nIf you cancel, your reservation will not be completed.')) {
+	if (confirm("When you click 'OK' you will be redirected to the Satellite payment page\nwhere you  will need to log in or create an account.\nIf you click cancel, your reservation will not be completed.")) {
   // Save it!
 	var resary = {};
 	resary['ritems'] = rarr;
@@ -192,7 +192,7 @@ async function completeReservation() {
 	let response = await postData(json_str,url);
 	if (response['status'] == "OK") {
 		let resId = response['reservation'] ;
-		window.location.href = "https://satellite.communitytv.org/wp-content/plugins/Ereserve/temp/satellite.php?reservation="+resId;
+		window.location.href = "https://sccurrents.org/VolCreds/satellitenew.php?reservation="+resId;
 	} else {
 		alert("Reservation Failed " + toString(response['error']));
 	}
