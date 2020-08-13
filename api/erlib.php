@@ -120,10 +120,10 @@ class DB
 		$itema  = array(); // array of items of type 'ritems'
 		
 		$ritems = $json['ritems']; // array of types to reserve
-		foreach( $ritems as $type ) {
+		$aitems = array_count_values($ritems); // item => count of item
+		foreach( $aitems as $type => $icount ) {
 			$sql = "SELECT `iid` FROM `Items` 
-					WHERE `tid` = ? AND `active`=1 AND `status` = 0 
-					LIMIT 1";
+					WHERE `tid` = ? AND `active`=1 AND `status` = 0";
 			$stmt = $this->db->prepare($sql);
 			$stmt->execute(array($type));
 			$row  = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -134,13 +134,17 @@ class DB
 				echo json_encode($result);
 				return;
 			}
-			$itema[] = $row['iid']; // array linking type to item to reserve
-		// now update each item to the "In Process" status
-			$sql = "UPDATE `Items` 
-					SET `status` = 1
-					WHERE `iid` = ?";
-			$stmta = $this->db->prepare($sql);
-			$stmta->execute(array($row['iid']));
+			$rcount = 1 ; // already fetched 1, now count the rest
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$rcount++ ;
+			}
+			if ($rcount < $icount) { // there are less available than requested
+				$result['status'] = "Error";
+				$reserror = array("Not Available" => "Only $rcount of total $icount");
+				$result['error'] = $reserror; // put array into result
+				echo json_encode($result);
+				return;
+			}
 		} // if we're still going, found all items
 		$wname  = $json['wname']; // whole name
 		$phone  = $json['phone'];
@@ -157,12 +161,27 @@ class DB
 							 $starttime,$endtime));
 		$lastId = $this->db->lastInsertId();
 
-		foreach ( $itema as $value ) { // put reserved items into detail table
+		foreach ( $ritems as $type ) { // put reserved items into detail table
+			$sql = "SELECT `iid` FROM `Items` 
+					WHERE `tid` = ? AND `active`= 1 AND `status` = 0
+					LIMIT 1";
+			$stmt = $this->db->prepare($sql);
+			$stmt->execute(array($type)); // found item to reserve
+			$row  = $stmt->fetch(PDO::FETCH_ASSOC);
+			$value = $row['iid'];
+			
 			$sql = "INSERT INTO `reservation_detail`
 						(`rid`, `item_id`, `status`)
 						VALUES($lastId, ? , 1)"; // status 1 is in process
 			$stmt = $this->db->prepare($sql);
 			$stmt->execute(array($value));
+			
+		// now update each item to the "In Process" status
+			$sql = "UPDATE `Items` 
+					SET `status` = 1
+					WHERE `iid` = ?";
+			$stmta = $this->db->prepare($sql);
+			$stmta->execute(array($value));
 		}
 		// return OK status now
 		$result['status'] = "OK";

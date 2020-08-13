@@ -402,7 +402,7 @@ function getCookie(cname) {
  * @return breadcrumbs html
  */
 function printBread() {
-	let htmldata = "";
+	let htmldata = "<h4>Click the breadcrumb below to go back, not the back button.</h4>";
 	let i = 0;
 	for ( ; i < breadBox.length - 1; i++) {
 		for (const property in breadBox[i]) {
