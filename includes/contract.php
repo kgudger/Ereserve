@@ -91,10 +91,21 @@ if (!empty($row)) { // reservation exists
 $start_date = new DateTime($startdate);
 $end_date = new DateTime($enddate);
 $daysrented = $end_date->diff($start_date)->format("%a");
-if ($daysrented == 0) $daysrented = 1; // minimum of 1 day!
+// create an iterateable period of date (P1D equates to 1 day)
+$period = new DatePeriod($start_date, new DateInterval('P1D'), $end_date);
+foreach($period as $dt) {
+    $curr = $dt->format('D');
+
+    // substract if Saturday or Sunday
+    if ($curr == 'Sat' || $curr == 'Sun') {
+        $daysrented--;
+    }
+}
+
+if ($daysrented <= 0) $daysrented = 1; // minimum of 1 day!
 $overdays = $daysrented - 3 ; // positive if more than 3 days
 if ($overdays > 0) {
-	$factor = 1 + 0.7/3 ; // day rate * 0.7
+	$factor = 1 + 0.7/3 * $overdays ; // day rate * 0.7
 } else {
 	$factor = 1 ; // minimum charge
 }

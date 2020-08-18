@@ -68,7 +68,18 @@ if (empty($row)) {
 	$int_inc = $interval->format('%d'); // numeric days
 	$cost = 0; // total cost for 3 days of equipment rental
 	$rate = 0;
-	if ($int_inc == 0) $int_inc = 1;
+// create an iterateable period of date (P1D equates to 1 day)
+	$period = new DatePeriod($start_date, new DateInterval('P1D'), $end_date);
+	foreach($period as $dt) {
+		$curr = $dt->format('D');
+
+    // substract if Saturday or Sunday
+		if ($curr == 'Sat' || $curr == 'Sun') {
+			$int_inc--;
+		}
+	}
+
+	if ($int_inc <= 0) $int_inc = 1;
 	if ($int_inc <= "1") {
 		$days = "1 day reservation";
 	} else {

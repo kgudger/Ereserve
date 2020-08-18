@@ -276,8 +276,24 @@ function calcPrice() {
 	let totalcost = 0;  // total cost
 	let startDate = document.getElementById('startdate').value;
 	let endDate = document.getElementById('enddate').value;
-	const timeDiff  = (new Date(endDate)) - (new Date(startDate));
-	let   days      = Math.round(timeDiff / (1000 * 60 * 60 * 24));
+    // normalize both start and end to beginning of the day
+	startDate = new Date(startDate) ;
+	endDate   = new Date(endDate) ;
+    startDate.setHours(0,0,0,0);
+    endDate.setHours(0,0,0,0);
+
+    startDate.setDate(startDate.getDate() + 1);
+    var days = 0; // total days
+    var day;
+    // loop through each day, checking
+    while (startDate <= endDate) { // 1 or more days
+        day = startDate.getDay();
+        if (day >= 0 && day <= 4) { // fix for date is one day in the past
+            ++days;
+        }
+        startDate.setDate(startDate.getDate() + 1);
+    }
+
 	days = days || 0 ;
 	if (days <= 3) days = 3; // minimum days
 	let factor = 1 + ((( days - 3 )/3) * 0.7) ; //
