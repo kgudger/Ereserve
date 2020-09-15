@@ -128,11 +128,11 @@ if (empty($row)) {
 		$rp_data = array(); // array of above reservation days within response
 	
 		$stdate = new DATETIME($start_date->format('l F j Y g:i:s A'),$tz);  // should be DateTime
-		for ( $i = 1; (($i <= $int_inc)); $i++ ) { // all inclusive
-			if ( $i == 0 ) {
+/*		for ( $i = 1; (($i <= $int_inc)); $i++ ) { // all inclusive
+			if ( $i == 0 ) {*/
 				$ndate = $stdate->format('Y-m-d\TH:i:sP'); // From 2017-10-10T12:30:00-04:00 to: 2017-10-12T14:30:00-04:00
 				$edate = $stdate->format('Y-m-d\T24:00:00P');
-			} else if ( $i == $int_inc ) {
+/*			} else if ( $i == $int_inc ) {
 				$stdate->modify("+1 day");
 				$ndate = $stdate->format('Y-m-d\T00:00:00P');
 				$edate = $stdate->format('Y-m-d\TH:i:sP');
@@ -141,12 +141,12 @@ if (empty($row)) {
 				$ndate = $stdate->format('Y-m-d\T00:00:00P');
 				$edate = $stdate->format('Y-m-d\T24:00:00P');
 			}
-						
+*/						
 			$ri_data = array("from" => $ndate, "to" => $edate);
 			array_push ($rp_data, $ri_data);
 			// rp_data is now: { from: "2014-10-22T16:30:00-07:00", to: "2014-10-23T00:00:00-07:00" },
 
-		}
+//		}
 	    if ( !empty($rp_data) ) {
 			$ru_data["reservationPeriods"]=$rp_data;
 	    }

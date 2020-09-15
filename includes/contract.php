@@ -121,7 +121,8 @@ $sql = "SELECT Types.title AS title, Types.rate AS rate,
 			Items, Types
    		WHERE detail.rid = ?
 			AND Items.iid = detail.item_id
-			AND Types.tid = Items.tid";
+			AND Types.tid = Items.tid
+			AND detail.status != 0";
 $stmt = $db->prepare($sql);
 $stmt->execute(array($resId));
 while($row  = $stmt->fetch(PDO::FETCH_ASSOC)) {

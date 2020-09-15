@@ -122,6 +122,7 @@ echo <<<EOT
 			labels: [ 
 EOT;
 foreach ($pi_label as $l) {
+	$l = str_replace('"','\"',$l);
 	echo '"' . $l . '",' ;
 }
 echo <<<EOT
