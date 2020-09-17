@@ -36,7 +36,7 @@ if ( $request != "selection-bundles" ) {
 	return;
 }
 
-$sql = "SELECT date1, date2
+$sql = "SELECT date1, date2, time1
 		FROM reservations
 		WHERE id = ?";
 $stmt = $db->prepare($sql);
@@ -53,15 +53,10 @@ if (empty($row)) {
 
 	$start_date = ($row['date1']);
 	$end_date = ($row['date2']);
-	$tz = new DateTimeZone('UTC'); // format in db
+	$start_time = ($row['time1']);
+	$tz = new DateTimeZone('America/Los_Angeles');
 	$start_date = new DateTime($start_date, $tz);
 	$end_date = new DateTime($end_date, $tz);
-	$tz = new DateTimeZone('America/Los_Angeles');
-	$start_date->setTimeZone($tz);
-	$end_date->setTimeZone($tz);
-//	$t1 = new DateTime($start_date->format('Y-m-d'));
-//	$t2 = new DateTime($end_date->format('Y-m-d'));
-//	$interval = date_diff($t1, $t2); // days between
 	$interval = date_diff(DateTime::createFromFormat('Y-m-d', $start_date->format('Y-m-d')),
 						DateTime::createFromFormat('Y-m-d', $end_date->format('Y-m-d')	) );
 	// changed to make sure we get all of the days 11/1/17
@@ -130,7 +125,7 @@ if (empty($row)) {
 		$stdate = new DATETIME($start_date->format('l F j Y g:i:s A'),$tz);  // should be DateTime
 /*		for ( $i = 1; (($i <= $int_inc)); $i++ ) { // all inclusive
 			if ( $i == 0 ) {*/
-				$ndate = $stdate->format('Y-m-d\TH:i:sP'); // From 2017-10-10T12:30:00-04:00 to: 2017-10-12T14:30:00-04:00
+				$ndate = $stdate->format('Y-m-d\T'.$start_time.'P'); // From 2017-10-10T12:30:00-04:00 to: 2017-10-12T14:30:00-04:00
 				$edate = $stdate->format('Y-m-d\T24:00:00P');
 /*			} else if ( $i == $int_inc ) {
 				$stdate->modify("+1 day");
