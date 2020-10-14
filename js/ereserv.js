@@ -12,6 +12,9 @@
  *
  */
 
+// variable to hold cookie data for this page
+var cookieItems =[]; // global variable for cookie items for this page
+
 /**
  * function to display shopping cart 
  */
@@ -76,7 +79,7 @@ function createOptions(selected) {
  */
 function addSelect(number,selected) {
 	let htmldata = "";
-	htmldata += "<select name='er_item" + number + "' id='er_item" + number + "' onchange='calcPrice()'>";
+	htmldata += "<select name='er_item" + number + "' id='er_item" + number + "' onchange='changeItem(" + number + ")'>";
 	htmldata += "<option value='0'>(Select item)</option>";
 	htmldata += createOptions(selected);
 	htmldata += "</select>";
@@ -100,6 +103,20 @@ function addAnotherItem(selected) {
 }
 
 /**
+ * function to change selected item
+ * @param number is id of select
+ */
+function changeItem(number) {
+	if ( number < cookieItems.length )
+		remCookieItem(cookieItems[number]); // remove items from cookie
+	let id = "er_item" + number ;
+	let e = document.getElementById(id);
+	let selItem = e.options[e.selectedIndex].value;
+	cookRes(parseInt(selItem),true);
+	calcPrice() ; // also puts new item in cookie items array
+}
+
+/**
  * function to remove selected item
  * @param number is id of select
  * @param selected is item selected to unselect
@@ -107,11 +124,32 @@ function addAnotherItem(selected) {
 function remSelect(number) {
 	let id = "er_item" + number ;
 	let elements = document.getElementById(id).options;
+	var e = document.getElementById(id);
+	let selItem = e.options[e.selectedIndex].value;
+	remCookieItem(selItem); // removes item from cookie string
     for(let i = 0; i < elements.length; i++){
       elements[i].selected = false;
     }
     calcPrice();
 }
+
+/**
+ * function to remove a cookie item from reservation form
+ * increments selectNumber
+ * adds an empty one if no cookies
+ */
+function remCookieItem(selItem) {
+	var json_str = getCookie('Reservation');
+	if (json_str !== "") {
+		var a2 = JSON.parse(json_str);
+		const index = a2.indexOf(parseInt(selItem));
+		if (index > -1) {
+			a2.splice(index, 1);
+			json_str = JSON.stringify(a2);
+			createCookie("Reservation", json_str);
+		}
+	}
+}	
 
 /**
  * function to add cookie items to reservation form
@@ -298,16 +336,20 @@ function calcPrice() {
 	if (days <= 3) days = 3; // minimum days
 	let factor = 1 + ((( days - 3 )/3) * 0.7) ; //
 	
+	cookieItems = []; // clears cookie items array
+	
 	for (let i = 0; i < selectNumber; i++ ) {
 		let id  = "er_item" + i;
 		let sel = document.getElementById(id);
 		let val = sel.options[sel.selectedIndex].value;
 		if (val >0) { // there's an item selected
 			totalcost += factor * findRate(retData,val); // add in cost
+			cookieItems[i] = val ; // adds item to cookie array
 		}	
 	}
 	let priceSpot = document.getElementById('total_cost');
 	priceSpot.innerHTML = "Total Cost is: $" + totalcost.toFixed(2); ;
+	
 }
 
 /**

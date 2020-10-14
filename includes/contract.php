@@ -116,7 +116,8 @@ echo <<<EOT
 EOT;
 
 $sql = "SELECT Types.title AS title, Types.rate AS rate,
-		Items.inventory AS inventory
+		Items.inventory AS inventory,
+		Types.description AS description
 		FROM reservation_detail AS detail,
 			Items, Types
    		WHERE detail.rid = ?
@@ -129,8 +130,10 @@ while($row  = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	$title = $row['title'];
 	$rate  = $row['rate'];
 	$inven = $row['inventory'];
+	$desc  = $row['description'];
 	$icost = $rate * $factor ;
-	echo "<tr><td>" . $title . "</td><td>" . $inven . "</td><td>$" . $rate . "</td><td>" . 
+	echo "<tr><td>" . $title . "<div style='margin-left:10px'>" . $desc . "</div>" . 
+		"</td><td>" . $inven . "</td><td>$" . $rate . "</td><td>" . 
 		$daysrented . "</td><td>$" . number_format(($icost),2) . 
 		"</td></tr>";
 	$cost+= $icost;

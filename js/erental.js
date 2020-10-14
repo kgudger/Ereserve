@@ -351,12 +351,17 @@ function createCookie(name, value) {
 /**
  * function to append (or create) cookie.
  * @param i is actual type id to add to cookie json 
+ * @param cart tells the routing to leave the html alone so the cart doesn't et messed up
  * cookie stored as json
  * if exists, turn back into array
  * add new type id to end of array
  * and create the new cookie
  */
-function cookRes(i) {
+function cookRes(i,cart) {
+	if (cart === undefined) {
+        	cart = false;
+	} // cart means not to update the html because it messes with the cart.
+
 	var json_str = getCookie('Reservation');
 	var arr =  [];
 	if (json_str !== "") {
@@ -365,22 +370,35 @@ function cookRes(i) {
 			arr.push(entry);
 		});
 	}
-	let avail = getAvail(retData,i); // get availability of new item
-	if (avail > 0) {
-		arr.push(i); // i is actual tid
-	}
-	json_str = JSON.stringify(arr);
-	createCookie("Reservation", json_str);
-	let stitle = findTitle(retData,i);
-	if (avail > 0) {
-		let htmldata = "<p><strong><font color='red'>" + findTitle(retData,i) + " added to reservation</font></strong></p>";
-		document.getElementById("er_display").innerHTML += htmldata;
-		alert("Added  " + stitle + " to your reservation.");
-	} else {
-		alert(stitle + " NOT available.");
+	if ( i > 0 ) { // it's a real item
+		let avail = getAvail(retData,i); // get availability of new item
+		if (avail > 0) {
+			arr.push(i); // i is actual tid
+		}
+		json_str = JSON.stringify(arr);
+		createCookie("Reservation", json_str);
+		let stitle = findTitle(retData,i);
+		if (avail > 0) {
+			if ( cart == false ) {
+				let htmldata = "<p><strong><font color='red'>" + findTitle(retData,i) + " added to reservation</font></strong></p>";
+				let oldhtml = document.getElementById("er_display").innerHTML ;
+				let newhtml = oldhtml + htmldata;
+				document.getElementById("er_display").innerHTML = newhtml ;
+				alert("Added  " + stitle + " to your reservation.");
+			}
+		} else {
+			alert(stitle + " NOT available.");
+		}
 	}
 }
 
+/**
+ * function to get cookie.
+ * @param cname is cookie name 
+ * cookie stored as json
+ * if exists, split on ';'
+ * @return cookie or empty string
+ */
 function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
