@@ -114,10 +114,10 @@ echo <<<EOT
 <table class='blueTable'>
 <tr><th>Item</th><th>Inventory Tag</th><th>3 day Cost</th><th>Days Rented</th><th>Extended Cost</th></tr>
 EOT;
-
+// substituting new column content for description
 $sql = "SELECT Types.title AS title, Types.rate AS rate,
 		Items.inventory AS inventory,
-		Types.description AS description
+		Types.contents AS description 
 		FROM reservation_detail AS detail,
 			Items, Types
    		WHERE detail.rid = ?

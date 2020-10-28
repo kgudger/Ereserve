@@ -214,7 +214,7 @@ async function completeReservation() {
 		return;
 	}
 //	alert("Reservation Success!");
-	if (confirm("When you click 'OK' you will be redirected to the Satellite payment page\nwhere you  will need to log in or create an account.\nIf you click cancel, your reservation will not be completed.")) {
+	if (confirm("When you click 'OK' you will be redirected to the Satellite payment page where you will need to log in or create an account.\nIf you click cancel, your reservation will not be completed.")) {
   // Save it!
 	var resary = {};
 	resary['ritems'] = rarr;
