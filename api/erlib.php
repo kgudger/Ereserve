@@ -32,7 +32,8 @@ class DB
 		$output = array(); // item output
 		$output2 = array(); // output json
 		$sql = "SELECT tid,title,description,Types.image AS image,
-				rate, Cat.name AS name, Types.active AS active
+				rate, Cat.name AS name, Types.active AS active,
+				contents
 				FROM Types, Categories AS Cat
                        		WHERE Types.active = 1
                         	AND Cat.cid = Types.cid
@@ -44,6 +45,8 @@ class DB
 			$tout['image'] = strval($row["image"]);
 			$tdesc  = mb_convert_encoding($row["description"],"UTF-8");
 			$tout['description'] = strip_tags($tdesc);
+			$tcont  = mb_convert_encoding($row["contents"],"UTF-8");
+			$tout['contents'] = strip_tags($tcont);
 			$rate   = strval(number_format($row["rate"], 2));
 			$tout['rate'] = strval($rate);
 			$tid   = $row["tid"];  // tid for next query.
@@ -199,6 +202,7 @@ class DB
 		$descrip = $json['desc']; // description
 		$image   = $json['image']; // image url
 		$rate    = $json['rate']; // rate
+		$cont    = $json['cont']; // contents
 		$frw     = explode("," , $json['frw']); // frequently rented with string -> array
 
 		if ( empty($typeid) ) { // get last tid, increment
@@ -208,15 +212,14 @@ class DB
 			$typeid = $tid['max'] + 1 ; // increment
 		}
 		$sql = "INSERT INTO `Types` 
-				VALUES(  ? , ? , ? , ? , ? , 1, ? )
+				VALUES(  ? , ? , ? , ? , ? , 1, ? , ?)
 				ON DUPLICATE KEY UPDATE
 				`cid` = ? , `title` = ?, `description` = ?,
-				`image` = ? , `rate` = ?";
+				`image` = ? , `rate` = ? , `contents` = ?";
 
 		$stmt = $this->db->prepare($sql);
-		$stmt->execute(array($typeid,$cid,$title,$descrip,$image,$rate,
-							  $cid,$title,$descrip,$image,$rate));
-		
+		$stmt->execute(array($typeid,$cid,$title,$descrip,$image,$rate,$cont,
+							  $cid,$title,$descrip,$image,$rate,$cont));		
 		if ( !(empty($frw)) ) { // first delete all old ones
 			$sql = "DELETE FROM `frequently_rented_with` WHERE `tid` = ?" ;
 			$stmt = $this->db->prepare($sql);

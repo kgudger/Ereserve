@@ -25,13 +25,14 @@ function showCatE(cat) {
 		erSearchE(searchTerm) ; // redo search 
 	} else {
 		let htmldata  = "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
-		htmldata += "<table class='er_table'><tr><th>TypeID</th><th>Category</th><th>Title</th><th>Description</th><th>Image</th><th>3 Day Rate</th><th>Rented With</th><th>Update</th></tr>";
+		htmldata += "<table class='er_table'><tr><th>TypeID</th><th>Category</th><th>Title</th><th>Description</th><th>Contents</th><th>Image</th><th>3 Day Rate</th><th>Rented With</th><th>Update</th></tr>";
 		htmldata += writeLinesE(retData,cat);
 		htmldata += "<tr>";
 		htmldata += "<td></td>" + // blank for tid
 					"<td>" + addSelectE(bignumber,0) + "</td>" + // select with nothing selected?
 					"<td><input type='text' id='title" + bignumber + "' name='title" + bignumber + "' value=''></td>" +
 					"<td><textarea id='desc"           + bignumber + "' name='desc"  + bignumber + "' rows='10' cols='30'></textarea></td>" +
+					"<td><textarea id='cont"           + bignumber + "' name='cont"  + bignumber + "' rows='5' cols='30'></textarea></td>" +
 					"<td><input type='text' id='image" + bignumber + "' name='image" + bignumber + "' value=''></td>" +
 					"<td><input type='text' id='rate"  + bignumber + "' name='rate"  + bignumber + "' value=''></td>" +
 					"<td><input type='text' id='frw"   + bignumber + "' name='frw "  + bignumber + "' value=''></td>" ;
@@ -102,6 +103,7 @@ function lineTypes(data,i) {
 					"<td>" + addSelectE(data[i]['type_id'],data[i]['category']) + "</td>" +
 					"<td><input type='text' id='title" + data[i]['type_id'] + "' name='title" + data[i]['type_id'] +"' value='" + data[i]['title'] + "'></td>" +
 					"<td><textarea id='desc" + data[i]['type_id'] + "' name='desc" + data[i]['type_id'] +"' rows='10' cols='30'>" + data[i]['description'] + "</textarea></td>" +
+					"<td><textarea id='cont" + data[i]['type_id'] + "' name='cont" + data[i]['type_id'] +"' rows='5' cols='30'>" + data[i]['contents'] + "</textarea></td>" +
 					"<td><input type='text' id='image" + data[i]['type_id'] + "' name='image" + data[i]['type_id'] +"' value='" + data[i]['image'] + "'></td>" +
 					"<td><input type='text' id='rate" + data[i]['type_id'] + "' name='rate" + data[i]['type_id'] + "' value='" + data[i]['rate'] + "'></td>" +
 					"<td><input type='text' id='frw"  + data[i]['type_id'] + "' name='frw"  + data[i]['type_id'] + "' value='" ;
@@ -324,6 +326,7 @@ async function modType(i) {
 	let cat = sel.options[sel.selectedIndex].value; // category
 	let title = document.getElementById('title'+i).value ;
 	let desc = document.getElementById('desc'+i).value ;
+	let cont = document.getElementById('cont'+i).value ;
 	let image = document.getElementById('image'+i).value ;
 	let rate = document.getElementById('rate'+i).value ;
 	let frw = document.getElementById('frw'+i).value ;
@@ -336,6 +339,7 @@ async function modType(i) {
 		itemary['image'] = image;
 		itemary['rate']   = rate;
 		itemary['frw'] = frw;
+		itemary['cont'] = cont;
 		let json_str = (JSON.stringify(itemary)); // encodeURI not work
 		let url = 'https://satellite.communitytv.org/erental.php?command=upType';
 		let response = await postData(json_str,url);
