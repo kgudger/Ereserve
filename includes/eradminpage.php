@@ -7,7 +7,7 @@
 * @author Keith Gudger
 * @copyright  (c) 2020, Keith Gudger, all rights reserved
 * @license    http://opensource.org/licenses/BSD-2-Clause
-* @version    Release: 0.7
+* @version    Release: 0.75
 * @package    SOS
 *
 * @note Has processData and showContent, 
@@ -31,29 +31,20 @@ class eradminPage extends MainPage {
  */
    
 function processData(&$uid) {
-/*
-  $uid = array($this->formL->getValue("cat"),
-				$this->formL->getValue("startd"),
-				$this->formL->getValue("endd"));
-
-  if ( isset($this->formL->getValue("getFile")[0]) && 
-			$this->formL->getValue("getFile")[0] == "yes" ) {
-	  $this->sessnp = "yes";
-  }*/
     // Process the verified data here.
 //    $stickyDate = $this->formL->getValue("sDate");
 	$sql = "SELECT id, status
 				FROM `reservations`";
 	$result = $this->db->query($sql);
-//	$fp = fopen('data.txt', 'a');//opens file in append mode  
-//	fwrite($fp, "Writing\n");  
+	$fp = fopen('data.txt', 'w');//opens file in write mode  
+	fwrite($fp, "Writing\n");  
 	$results = print_r($_REQUEST, true);
 //	fwrite($fp, $results . "\n");
 	while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-//		fwrite($fp, 'id is ' . $row['id'] . "\n");  
 		$stat = $this->formL->getValue("stat" . $row['id']);
 //		fwrite($fp, '$stat is ' . (($stat == "") ? "Empty" : $stat) . "\n");  
 		if ($stat != "") { // form element exists
+			fwrite($fp, 'id is ' . $row['id'] . "\n");  
 			$rid = $row['id'] ;
 			$rstat = $row['status'];
 			$sql = "UPDATE reservations
@@ -69,24 +60,48 @@ function processData(&$uid) {
 			$stmt->execute(array($rid)); // reads from reservation detail
 			while ($row2 = $stmt->fetch(PDO::FETCH_ASSOC)) {
 				$item_id = $row2['item_id'];
+				$invitem  = $this->formL->getValue("inv"  . $row['id'] . "-" . $item_id);
 				$statitem = $this->formL->getValue("stat" . $row['id'] . "-" . $item_id);
-				$sql = "UPDATE Items
-					SET status = ?
-					WHERE iid = $item_id";
-				$res = $this->db->prepare($sql);
-				$res->execute(array($statitem)); // updates item
-
-				$sql = "UPDATE reservation_detail
+				fwrite($fp, "item_id=$item_id invitem=$invitem statitem=$statitem" . "\n");
+				if ($invitem == $item_id) { // the same inventory item - hasn't changed
+					$sql = "UPDATE Items
 						SET status = ?
-						WHERE rid = ? 
-						AND item_id = ?";
-				$res = $this->db->prepare($sql);
-				$res->execute(array($statitem,$rid,$item_id)); // updates reservation detail status
+						WHERE iid = ?" ;
+					$res = $this->db->prepare($sql);
+					$res->execute(array($statitem,$item_id)); // updates item
+					$sql = "UPDATE reservation_detail
+							SET status = ?
+							WHERE rid = ? 
+							AND item_id = ?";
+					$res = $this->db->prepare($sql);
+					$res->execute(array($statitem,$rid,$item_id)); // updates reservation detail status
+					fwrite($fp, "updating $item_id  to status $statitem" . "\n");
+				} else {
+					$sql = "UPDATE Items
+						SET status = 0
+						WHERE iid = ?";
+					$res = $this->db->prepare($sql);
+					$res->execute(array($item_id)); // updates item to available
+					
+					$sql = "UPDATE Items
+						SET status = ?
+						WHERE iid = $invitem"; // update new items status
+					$res = $this->db->prepare($sql);
+					$res->execute(array($statitem)); // updates item
+					fwrite($fp, "updating $invitem  to status $statitem" . "\n");
+					$sql = "UPDATE reservation_detail
+							SET status = ?, item_id = ?
+							WHERE rid = ? 
+							AND item_id = ?";
+					$res = $this->db->prepare($sql);
+					$res->execute(array($statitem,$invitem,$rid,$item_id)); // updates reservation detail status
+					$item_id = $invitem ; // new item id
+				}
 			}
 //			fwrite($fp, 'id is' . $row['id'] . "status is " . $stat);  
 		}
 	}
-//	fclose($fp);  
+	fclose($fp);  
 }
 
 /**
@@ -130,7 +145,8 @@ function showContent($title, &$uid) {
 				$sql = "SELECT Items.status AS status,
 							Types.title AS name,
 							Items.inventory as inventory,
-							Items.iid AS iid
+							Items.iid AS iid,
+							Items.tid AS tid
 						FROM reservation_detail AS RD,
 							Types, Items
 						WHERE Types.tid = Items.tid
@@ -138,8 +154,20 @@ function showContent($title, &$uid) {
 							AND RD.rid = " . $row['id'];
 				$res2 = $this->db->query($sql);
 				while ($row2 = $res2->fetch(PDO::FETCH_ASSOC)) {
+					$invarray = array();
+					$sql = "SELECT Items.inventory AS inv,
+							Items.iid AS iid
+							FROM Items
+							WHERE status = 0 AND active = 1
+							AND Items.tid = " .$row2['tid'];
+					$res3 = $this->db->query($sql);
+					while ($row3 = $res3-> fetch(PDO::FETCH_ASSOC)) {
+						$invarray[$row3['inv']] =  $row3['iid'];
+					}
+					$invarray[$row2['inventory']] = $row2['iid'];
 					$retpage .= "<tr><td>" . $row2['name'] . "</td><td>" . 
-						$row2['inventory'] . "</td><td>" .
+						$this->formL->makeSelect("inv"  . $row['id'] . "-" . $row2['iid'], $invarray, $row2['iid']) .
+						 "</td><td>" .
 						$this->formL->makeSelect("stat" . $row['id'] . "-" . $row2['iid'], $statarray, $row2['status']) .
 //						array_search($row2['status'], $statarray) . 
 						"</td></tr>";
