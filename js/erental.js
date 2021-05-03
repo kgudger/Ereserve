@@ -51,6 +51,8 @@ function showPage(i,cat) {
 	htmldata += "<br><button class='er_button' onclick='sliceBread(" + 
 		breadspot + ")'>Return to " + cat + " Page</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
+//	document.location.hash = '#' + cat + "-" + i;
+	window.history.pushState(cat, cat + "-" + i, "/equipment-reservations/?" + cat + "-" + i);
 }
 
 /**
@@ -70,6 +72,14 @@ const fetchRecs = async () => {
 		catData    = data['cats']; 
 		statusData = data['status'];
 		itemData   = data['items'];
+		
+		if ( (queryString != "") && (queryString != "#") ) { // there's a link
+			let ret = queryString.replace('?',''); // takes out leading '?'
+			ret = ret.replace('#',''); // takes out trailing '#'
+			let res = ret.split("-"); // splits into cat and i
+			showPage(res[1],res[0])
+		}
+	  	
 	  	return data 
 	  	})
 }
@@ -108,6 +118,8 @@ function writeLines(data,cat) {
 }
 // get data array at start up.
 fetchRecs();
+const queryString = window.location.search;
+console.log(queryString);
 var retData =[]; // data array global variable
 var listOfObjects = []; // defined as an object, for search.
 var searchTerm = ""; // global to store searched term
@@ -475,7 +487,8 @@ function sliceBread(i) {
 			showCart();
 			break;
 		case "home":
-			window.location.reload(false); 
+			window.history.pushState("equip", "equipment reservations", "/equipment-reservations/");
+			window.location.reload(true); 
 			break;
 		default:
 			break;

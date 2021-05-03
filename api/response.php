@@ -76,6 +76,6 @@ if ( $request != "reservation-results" ) {
 }
 echo $response;
 $file = './response.txt';
-file_put_contents($file, print_r($url_elements));
+//file_put_contents($file, print_r($url_elements));
 file_put_contents($file, $response);
 ?>
