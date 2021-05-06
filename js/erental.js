@@ -34,6 +34,7 @@ function showCat(cat) {
 		htmldata += "<h4>* Add item to reservation.</h4>";
 		document.getElementById("er_display").innerHTML = htmldata;
 	}
+	window.history.pushState(cat, cat, "/equipment-reservations/?" + cat );
 }
 
 /**
@@ -51,7 +52,6 @@ function showPage(i,cat) {
 	htmldata += "<br><button class='er_button' onclick='sliceBread(" + 
 		breadspot + ")'>Return to " + cat + " Page</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
-//	document.location.hash = '#' + cat + "-" + i;
 	window.history.pushState(cat, cat + "-" + i, "/equipment-reservations/?" + cat + "-" + i);
 }
 
@@ -76,8 +76,12 @@ const fetchRecs = async () => {
 		if ( (queryString != "") && (queryString != "#") ) { // there's a link
 			let ret = queryString.replace('?',''); // takes out leading '?'
 			ret = ret.replace('#',''); // takes out trailing '#'
+			ret = decodeURI(ret);
 			let res = ret.split("-"); // splits into cat and i
-			showPage(res[1],res[0])
+			if (res[1] != null) 
+				showPage(res[1],res[0])
+			else
+				showCat(res[0]);
 		}
 	  	
 	  	return data 
