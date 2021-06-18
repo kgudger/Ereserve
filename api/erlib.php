@@ -53,8 +53,8 @@ class DB
 
 			$sql = "SELECT COUNT(*) FROM Items
 				WHERE tid = $tid
-				AND status =0
-				AND active = 1";
+				AND status <3
+				AND active = 1"; // changed to <3, maybe a problem?
 			$res2 = $this->db->query($sql);
 			$row2 = $res2->fetch(PDO::FETCH_ASSOC);
 			$avail = $row2["COUNT(*)"];

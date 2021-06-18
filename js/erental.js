@@ -120,8 +120,6 @@ function writeLines(data,cat) {
 	}
 	return htmldata;
 }
-// get data array at start up.
-fetchRecs();
 const queryString = window.location.search;
 console.log(queryString);
 var retData =[]; // data array global variable
@@ -133,6 +131,8 @@ var itemData = []; 	 // global array of returned items
 var selectNumber = 0; // how many selects added to reservation form
 					// remember to reset this on successful reservation
 var breadBox = [{"home":"Home"}]; // array to act as stack for breadcrumbs
+// get data array at start up.
+fetchRecs();
 
 /**
  * function to display page of individual item.
