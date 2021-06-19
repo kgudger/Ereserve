@@ -46,7 +46,7 @@ if ( $request != "reservation-results" ) {
         		WHERE id = ?";
 		$stmt = $db->prepare($sql);
 		$stmt->execute(array($bundle));
-
+/*
 		$sql = "SELECT item_id 
 				FROM reservation_detail
 				WHERE rid = ?";
@@ -59,7 +59,7 @@ if ( $request != "reservation-results" ) {
 				WHERE iid = $item_id";
 			$res = $db->prepare($sql);
 			$res->execute(array()); // updates item
-		}
+		} */
 		$sql = "UPDATE reservation_detail
 				SET status = 2
 				WHERE rid = ?";

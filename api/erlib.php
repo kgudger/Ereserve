@@ -126,7 +126,10 @@ class DB
 		$aitems = array_count_values($ritems); // item => count of item
 		foreach( $aitems as $type => $icount ) {
 			$sql = "SELECT `iid` FROM `Items` 
-					WHERE `tid` = ? AND `active`=1 AND `status` = 0";
+					WHERE `tid` = ? AND `active`=1 AND `status` = 0
+					AND iid NOT IN
+						(SELECT item_id FROM `reservation_detail`
+						WHERE status > 1)";
 			$stmt = $this->db->prepare($sql);
 			$stmt->execute(array($type));
 			$row  = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -167,6 +170,9 @@ class DB
 		foreach ( $ritems as $type ) { // put reserved items into detail table
 			$sql = "SELECT `iid` FROM `Items` 
 					WHERE `tid` = ? AND `active`= 1 AND `status` = 0
+					AND iid NOT IN
+						(SELECT item_id FROM `reservation_detail`
+						WHERE status > 1) 
 					LIMIT 1";
 			$stmt = $this->db->prepare($sql);
 			$stmt->execute(array($type)); // found item to reserve
@@ -180,11 +186,11 @@ class DB
 			$stmt->execute(array($value));
 			
 		// now update each item to the "In Process" status
-			$sql = "UPDATE `Items` 
+/*			$sql = "UPDATE `Items` 
 					SET `status` = 1
 					WHERE `iid` = ?";
 			$stmta = $this->db->prepare($sql);
-			$stmta->execute(array($value));
+			$stmta->execute(array($value)); */ // removed for now
 		}
 		// return OK status now
 		$result['status'] = "OK";
