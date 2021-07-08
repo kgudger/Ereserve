@@ -77,11 +77,21 @@ const fetchRecs = async () => {
 			let ret = queryString.replace('?',''); // takes out leading '?'
 			ret = ret.replace('#',''); // takes out trailing '#'
 			ret = decodeURI(ret);
-			let res = ret.split("-"); // splits into cat and i
-			if (res[1] != null) 
-				showPage(res[1],res[0])
-			else
-				showCat(res[0]);
+			let res = ret.split("&"); // splits into center and user
+			for (const elem of res) {
+				let nres = elem.split("=");
+				if (nres[0] == "user") { // store user number in cookie
+					document.cookie = elem; // user=xx
+					user_no = nres[1]; // store in global variable
+				}
+			}
+			let ores = ret.split("-"); // splits into cat and i
+			if (!(ores[0].includes("user") || ores[0].includes("center"))) { // link
+				if (ores[1] != null) 
+					showPage(ores[1],ores[0])
+				else
+					showCat(ores[0]);
+			}
 		}
 	  	
 	  	return data 
@@ -131,6 +141,7 @@ var itemData = []; 	 // global array of returned items
 var selectNumber = 0; // how many selects added to reservation form
 					// remember to reset this on successful reservation
 var breadBox = [{"home":"Home"}]; // array to act as stack for breadcrumbs
+var user_no = 0 ; // user number from Satellite site.
 // get data array at start up.
 fetchRecs();
 

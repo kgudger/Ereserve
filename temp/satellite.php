@@ -45,13 +45,17 @@ if (!empty($row)) { // reservation exists
 			if ( isset($_COOKIE['user'] ) ) {
 				$cook_val .= "&user=" . $_COOKIE['user'];
 			}
-			$altRedirect = "https://scdigital.satellitedeskworks.com/#/bundle-reservation/" . $resId . $cook_val ;
+			if (isset($_REQUEST['user'])) { // user id is set
+				$cook_val .= "&user=" . $_REQUEST['user'];
+			}
+			$altRedirect = "https://scdigital.satellitedeskworks.com/#/bundle-reservation/" . $resId . "/confirm" . $cook_val ;
 			$cost+= $row['rate'];
 		}
 	}
 	$myfile = fopen("/var/www/html/VolCreds/satcost.txt","w") or die("Unable to open file");
 	fwrite($myfile, $altRedirect);
-	fwrite($myfile,"\n" . print_r($_COOKIE, true ));
+//	fwrite($myfile,"\n" . print_r($_COOKIE, true ));
+	fwrite($myfile,"\n" . print_r($_REQUEST, true ));
 	fwrite($myfile,"\nCost is " . $cost);
 	fclose($myfile);
 //	echo "Cost is " . $cost;

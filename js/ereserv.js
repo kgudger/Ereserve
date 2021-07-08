@@ -230,6 +230,8 @@ async function completeReservation() {
 	let response = await postData(json_str,url);
 	if (response['status'] == "OK") {
 		let resId = response['reservation'] ;
+		if (user_no > 0)  // user number set by referal
+			resId += "&user=" + user_no;
 		window.location.href = "https://sccurrents.org/VolCreds/satellitenew.php?reservation="+resId;
 	} else {
 		alert("Reservation Failed " + toString(response['error']));

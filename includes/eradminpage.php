@@ -61,8 +61,8 @@ function processData(&$uid) {
 			while ($row2 = $stmt->fetch(PDO::FETCH_ASSOC)) {
 				$item_id = $row2['item_id'];
 				$invitem  = $this->formL->getValue("inv"  . $row['id'] . "-" . $item_id);
-				$statitem = $this->formL->getValue("stat" . $row['id'] . "-" . $item_id);
-				fwrite($fp, "item_id=$item_id invitem=$invitem statitem=$statitem" . "\n");
+//				$statitem = $this->formL->getValue("stat" . $row['id'] . "-" . $item_id);
+				fwrite($fp, "item_id=$item_id invitem=$invitem statitem=$stat" . "\n");
 				if ($invitem == $item_id) { // the same inventory item - hasn't changed
 /*					$sql = "UPDATE Items
 						SET status = ?
@@ -75,7 +75,7 @@ $res->execute(array($statitem,$item_id)); // updates item
 							AND item_id = ?";
 					$res = $this->db->prepare($sql);
 					$res->execute(array($stat,$rid,$item_id)); // updates reservation detail status
-					fwrite($fp, "updating $item_id  to status $statitem" . "\n");
+					fwrite($fp, "updating $item_id  to status $stat" . "\n");
 				} else {
 /*					$sql = "UPDATE Items
 						SET status = 0
@@ -94,7 +94,7 @@ $res->execute(array($statitem,$item_id)); // updates item
 							WHERE rid = ? 
 							AND item_id = ?";
 					$res = $this->db->prepare($sql);
-					$res->execute(array($statitem,$invitem,$rid,$item_id)); // updates reservation detail status
+					$res->execute(array($stat,$invitem,$rid,$item_id)); // updates reservation detail status
 					$item_id = $invitem ; // new item id
 				}
 			}
