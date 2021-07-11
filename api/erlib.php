@@ -124,14 +124,22 @@ class DB
 		
 		$ritems = $json['ritems']; // array of types to reserve
 		$aitems = array_count_values($ritems); // item => count of item
+		$startdate = $json['startdate'];
+		$enddate   = $json['enddate'];
+
 		foreach( $aitems as $type => $icount ) {
 			$sql = "SELECT `iid` FROM `Items` 
 					WHERE `tid` = ? AND `active`=1 AND `status` = 0
 					AND iid NOT IN
-						(SELECT item_id FROM `reservation_detail`
-						WHERE status > 1)";
+						(SELECT item_id FROM `reservation_detail`, `reservations`, `Items`
+      							WHERE Items.tid = ?
+							AND Items.iid = reservation_detail.item_id
+							AND reservation_detail.status > 0
+							AND (date1 <= ? AND date2 >= ?)
+							AND reservation_detail.rid = reservations.id)";
+
 			$stmt = $this->db->prepare($sql);
-			$stmt->execute(array($type));
+			$stmt->execute(array($type,$type,$enddate,$startdate));
 			$row  = $stmt->fetch(PDO::FETCH_ASSOC);
 			if (empty($row)) { // no item available! Stop!
 				$result['status'] = "Error";
@@ -155,8 +163,6 @@ class DB
 		$wname  = $json['wname']; // whole name
 		$phone  = $json['phone'];
 		$email  = $json['email'];
-		$startdate = $json['startdate'];
-		$enddate   = $json['enddate'];
 		$starttime = $json['starttime'];
 		$endtime   = $json['endtime'];
 		$sql = "INSERT INTO `reservations` 
@@ -171,11 +177,15 @@ class DB
 			$sql = "SELECT `iid` FROM `Items` 
 					WHERE `tid` = ? AND `active`= 1 AND `status` = 0
 					AND iid NOT IN
-						(SELECT item_id FROM `reservation_detail`
-						WHERE status > 1) 
+						(SELECT item_id FROM `reservation_detail`, `reservations`, `Items`
+      							WHERE Items.tid = ?
+							AND Items.iid = reservation_detail.item_id
+							AND reservation_detail.status > 0
+							AND (date1 <= ? AND date2 >= ?)
+							AND reservation_detail.rid = reservations.id)
 					LIMIT 1";
 			$stmt = $this->db->prepare($sql);
-			$stmt->execute(array($type)); // found item to reserve
+			$stmt->execute(array($type,$type,$enddate,$startdate)); // found item to reserve
 			$row  = $stmt->fetch(PDO::FETCH_ASSOC);
 			$value = $row['iid'];
 			
