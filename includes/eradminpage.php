@@ -42,16 +42,18 @@ function processData(&$uid) {
 //	fwrite($fp, $results . "\n");
 	while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 		$stat = $this->formL->getValue("stat" . $row['id']);
+		$date1 = $this->formL->getValue("Date1" . $row['id']);
+		$date2 = $this->formL->getValue("Date2" . $row['id']);
 //		fwrite($fp, '$stat is ' . (($stat == "") ? "Empty" : $stat) . "\n");  
 		if ($stat != "") { // form element exists
 			fwrite($fp, 'id is ' . $row['id'] . "\n");  
 			$rid = $row['id'] ;
 			$rstat = $row['status'];
 			$sql = "UPDATE reservations
-						SET status = ? 
+						SET status = ? , date1 = ?, date2 = ? 
 						WHERE id =   ? ";
 			$res = $this->db->prepare($sql);
-			$res->execute(array($stat,$rid)); // updates reservation table status
+			$res->execute(array($stat,$date1,$date2,$rid)); // updates reservation table status
 
 			$sql = "SELECT item_id 
 					FROM reservation_detail
@@ -138,8 +140,8 @@ function showContent($title, &$uid) {
 		$retpage .= "<table><tr><th>Name</th><th>Start</th><th>Stop</th><th>Status</th><th>Gear</th><th>Contract</th></tr>";
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			if ( ($row['status'] > 0) || ($row['date2'] >= $sDate) ) {
-				$retpage .= "<tr><td>" . $row['name'] . "</td><td>" . $row['date1'] . "</td>" ;
-				$retpage .= "<td>" . $row['date2'] . "</td>";
+				$retpage .= "<tr><td>" . $row['name'] . "</td><td>" . $this->formL->makeDateInput("Date1" . $row['id'],$value=$row['date1']) . "</td>" ;
+				$retpage .= "<td>" . $this->formL->makeDateInput("Date2" . $row['id'],$value=$row['date2']) . "</td>";
 				$retpage .= "<td>" . $this->formL->makeSelect("stat" . $row['id'], $statarray, $row['status']) . "</td>";
 //				$retpage .= "<td><table><tr><th>Name</th><th>Inventory</th><th>Status</th></tr>" ;
 				$retpage .= "<td><table><tr><th>Name</th><th>Inventory</th></tr>" ;
