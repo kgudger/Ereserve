@@ -121,6 +121,7 @@ function showContent($title, &$uid) {
 	$retpage .= "<button>Pie Charts!</button></a><br><br>";
 	$retpage .= $this->formL->start('POST', "/equipment-reservation-administration", 'name="E Admin"');
 	$retpage .= "<h4>All active reservations and all reservations ending after below date.</h4>";
+	$retpage .= "<h4 style='color: red;'>Note: If you change the dates for a reservation, please watch for any conflicts in upcoming reservations.</h4>";
 	$date = date("Y-m-d");
 	$retpage .= $this->formL->makeDateInput("sDate",$date);
 	$sDate = $this->formL->getValue("sDate") ;

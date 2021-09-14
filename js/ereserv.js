@@ -234,7 +234,9 @@ async function completeReservation() {
 			resId += "&user=" + user_no;
 		window.location.href = "https://sccurrents.org/VolCreds/satellitenew.php?reservation="+resId;
 	} else {
-		alert("Reservation Failed " + toString(response['error']));
+		let err_str = response['error'];
+		console.log(err_str);
+		alert("Reservation Failed " + err_str);
 	}
 	} else {
   // Do nothing!

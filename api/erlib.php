@@ -143,7 +143,7 @@ class DB
 			$row  = $stmt->fetch(PDO::FETCH_ASSOC);
 			if (empty($row)) { // no item available! Stop!
 				$result['status'] = "Error";
-				$reserror = array("Not Available" => $type);
+				$reserror = "Not Available: " . $type;
 				$result['error'] = $reserror; // put array into result
 				echo json_encode($result);
 				return;
@@ -154,7 +154,7 @@ class DB
 			}
 			if ($rcount < $icount) { // there are less available than requested
 				$result['status'] = "Error";
-				$reserror = array("Not Available" => "Only $rcount of total $icount");
+				$reserror = "Not Available: " . "Only $rcount of total $icount";
 				$result['error'] = $reserror; // put array into result
 				echo json_encode($result);
 				return;
