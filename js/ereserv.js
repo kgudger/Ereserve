@@ -327,6 +327,7 @@ function calcPrice() {
     startDate.setDate(startDate.getDate() + 1);
     var days = 0; // total days
     var day;
+    var day1;
     // loop through each day, checking
     while (startDate <= endDate) { // 1 or more days
         day = startDate.getDay();
@@ -337,6 +338,11 @@ function calcPrice() {
     }
 
 	days = days || 0 ;
+	if (days == 0)
+		day1 = 1;
+	else
+		day1 = days; // number of real days for 1 day rentals
+
 	if (days <= 3) days = 3; // minimum days
 	let factor = 1 + ((( days - 3 )/3) * 0.7) ; //
 	
@@ -347,7 +353,11 @@ function calcPrice() {
 		let sel = document.getElementById(id);
 		let val = sel.options[sel.selectedIndex].value;
 		if (val >0) { // there's an item selected
-			totalcost += factor * findRate(retData,val); // add in cost
+			let dayO = findDRate(retData,val); // 1 day rate? or null
+			if ( (dayO != null) && (dayO == 1) )
+				totalcost += day1 * findRate(retData,val); // per day cost
+			else
+				totalcost += factor * findRate(retData,val); // add in cost
 			cookieItems[i] = val ; // adds item to cookie array
 		}	
 	}
@@ -360,12 +370,26 @@ function calcPrice() {
  * function to find rate from tid in data array
  * @param data is returned data array
  * @param j is tid
- * @return title for tid j
+ * @return rate for tid j
  */
 function findRate(data,j) {
 	for (let i = 0; i < data.length; i++) { // search entire array until found
 		if (data[i]['type_id'] == j) {
 			return data[i]['rate'];
+		}
+	}
+}
+
+/**
+ * function to find if it's a 1 day rental from tid in data array
+ * @param data is returned data array
+ * @param j is tid
+ * @return 1day valye for tid j
+ */
+function findDRate(data,j) {
+	for (let i = 0; i < data.length; i++) { // search entire array until found
+		if (data[i]['type_id'] == j) {
+			return data[i]['1day'];
 		}
 	}
 }
