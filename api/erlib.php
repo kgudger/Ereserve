@@ -33,7 +33,7 @@ class DB
 		$output2 = array(); // output json
 		$sql = "SELECT tid,title,description,Types.image AS image,
 				rate, Cat.name AS name, Types.active AS active,
-				contents
+				contents, 1day
 				FROM Types, Categories AS Cat
                        		WHERE Types.active = 1
                         	AND Cat.cid = Types.cid
@@ -50,6 +50,8 @@ class DB
 			$rate   = strval(number_format($row["rate"], 2));
 			$tout['rate'] = strval($rate);
 			$tid   = $row["tid"];  // tid for next query.
+			$Oday  = $row["1day"]; // Is this a 1 day price?
+			$tout['1day'] = $Oday;
 
 			$sql = "SELECT COUNT(*) FROM Items
 				WHERE tid = $tid
@@ -58,7 +60,11 @@ class DB
 			$res2 = $this->db->query($sql);
 			$row2 = $res2->fetch(PDO::FETCH_ASSOC);
 			$avail = $row2["COUNT(*)"];
-			$tout['day_rate'] = strval(number_format(($rate/3*0.7),2)) ;
+			if ( $Oday == "1" ) { // It's a 1 day rental
+				$tout['day_rate'] = strval(number_format(($rate),2)) ;
+			} else {
+				$tout['day_rate'] = strval(number_format(($rate/3*0.7),2)) ;
+			}
 			$tout['availability'] = strval($avail);
 			$tout['category'] = $row["name"];
 			$tout['type_id'] = $tid;

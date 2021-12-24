@@ -28,10 +28,11 @@ function showCat(cat) {
 		breadBox.push({"cat":cat});
 		let htmldata = printBread();
 		htmldata += "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
-		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
+		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price (unless noted<sup>1</sup>)</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
 		htmldata += writeLines(retData,cat);
 		htmldata += "</table>";
 		htmldata += "<h4>* Add item to reservation.</h4>";
+		htmldata += "<h4>'1' One day price.</h4>";
 		document.getElementById("er_display").innerHTML = htmldata;
 	}
 	window.history.pushState(cat, cat, "/equipment-reservations/?" + cat );
@@ -120,7 +121,10 @@ function writeLines(data,cat) {
 				"<a href='#' onclick='showPage(" + i + ",\"" + cat + "\")'> ...more" + "</a></td>";
 				// for description, only show first 500 characters, 
 				// include link to individual page for 'more'
-			htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "</td>";
+			if ( (data[i]['1day'] != null) && (data[i]['1day'] == 1) )
+				htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "<sup>1</sup></td>";
+			else
+				htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>$" + data[i]['day_rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>" + data[i]['availability'] + "</td>";
 			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
@@ -158,8 +162,11 @@ function writeItem(data,i,cat) {
 	htmldata += "<br><h2>" + data[i]['title'] + "</h2>" ;
 	htmldata += "<img src='" + data[i]['image'] + "'>" ;	
 	htmldata += "<p>" + data[i]['description'] + "</p><br>" ;
-	htmldata += "<p><strong>3 Day Price:</strong> $" + 
-		data[i]['rate'] + "</p>" ;
+	if ( ( data[i]['1day'] != null ) && ( data[i]['1day'] == 1 ) ) 
+		htmldata += "<p><strong>1 Day Price:</strong> $" 
+	else
+		htmldata += "<p><strong>3 Day Price:</strong> $" 
+	htmldata += data[i]['rate'] + "</p>" ;
 	htmldata += "<p><strong>Extra Day Price:</strong> $" + 
 		data[i]['day_rate'] + "</p>" ;
 	htmldata += "<p><strong>Number Available:</strong> " + 
