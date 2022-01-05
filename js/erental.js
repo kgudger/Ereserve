@@ -28,11 +28,11 @@ function showCat(cat) {
 		breadBox.push({"cat":cat});
 		let htmldata = printBread();
 		htmldata += "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
-		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price (unless noted<sup>1</sup>)</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
+		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>1 Day Price</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
 		htmldata += writeLines(retData,cat);
 		htmldata += "</table>";
 		htmldata += "<h4>* Add item to reservation.</h4>";
-		htmldata += "<h4>'1' One day price.</h4>";
+//		htmldata += "<h4>'1' One day price.</h4>";
 		document.getElementById("er_display").innerHTML = htmldata;
 	}
 	window.history.pushState(cat, cat, "/equipment-reservations/?" + cat );
@@ -122,9 +122,9 @@ function writeLines(data,cat) {
 				// for description, only show first 500 characters, 
 				// include link to individual page for 'more'
 			if ( (data[i]['1day'] != null) && (data[i]['1day'] == 1) )
-				htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "<sup>1</sup></td>";
+				htmldata += "<td class='er_t_i'>-</td><td class='er_t_i'>$" + data[i]['rate'] + "</td>";
 			else
-				htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "</td>";
+				htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "</td><td class='er_t_i'>-</td>";
 			htmldata += "<td class='er_t_i'>$" + data[i]['day_rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>" + data[i]['availability'] + "</td>";
 			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 

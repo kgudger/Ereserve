@@ -61,7 +61,7 @@ class DB
 			$row2 = $res2->fetch(PDO::FETCH_ASSOC);
 			$avail = $row2["COUNT(*)"];
 			if ( $Oday == "1" ) { // It's a 1 day rental
-				$tout['day_rate'] = strval(number_format(($rate),2)) ;
+				$tout['day_rate'] = strval(number_format(($rate*0.7),2)) ;
 			} else {
 				$tout['day_rate'] = strval(number_format(($rate/3*0.7),2)) ;
 			}

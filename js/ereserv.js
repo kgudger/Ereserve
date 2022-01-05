@@ -345,6 +345,7 @@ function calcPrice() {
 
 	if (days <= 3) days = 3; // minimum days
 	let factor = 1 + ((( days - 3 )/3) * 0.7) ; //
+	let factor1 = 1 + ((day1-1)*0.7) ; // extra day rate for 1day
 	
 	cookieItems = []; // clears cookie items array
 	
@@ -355,7 +356,7 @@ function calcPrice() {
 		if (val >0) { // there's an item selected
 			let dayO = findDRate(retData,val); // 1 day rate? or null
 			if ( (dayO != null) && (dayO == 1) )
-				totalcost += day1 * findRate(retData,val); // per day cost
+				totalcost += factor1 * findRate(retData,val); // per day cost
 			else
 				totalcost += factor * findRate(retData,val); // add in cost
 			cookieItems[i] = val ; // adds item to cookie array
