@@ -25,7 +25,7 @@ function showCatE(cat) {
 		erSearchE(searchTerm) ; // redo search 
 	} else {
 		let htmldata  = "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
-		htmldata += "<table class='er_table'><tr><th>TypeID</th><th>Category</th><th>Title</th><th>Description</th><th>Contents</th><th>Image</th><th>3 Day Rate</th><th>Rented With</th><th>Update</th></tr>";
+		htmldata += "<table class='er_table'><tr><th>TypeID</th><th>Category</th><th>Title</th><th>Description</th><th>Contents</th><th>Image</th><th>3/1 Day Rate</th><th>1 Day?</th><th>Rented With</th><th>Update</th></tr>";
 		htmldata += writeLinesE(retData,cat);
 		htmldata += "<tr>";
 		htmldata += "<td></td>" + // blank for tid
@@ -35,6 +35,7 @@ function showCatE(cat) {
 					"<td><textarea id='cont"           + bignumber + "' name='cont"  + bignumber + "' rows='5' cols='30'></textarea></td>" +
 					"<td><input type='text' id='image" + bignumber + "' name='image" + bignumber + "' value=''></td>" +
 					"<td><input type='text' id='rate"  + bignumber + "' name='rate"  + bignumber + "' value=''></td>" +
+					"<td><input type='checkbox' id='1day"  + bignumber + "' name='1day"  + bignumber + "' value='1day'></td>" +
 					"<td><input type='text' id='frw"   + bignumber + "' name='frw "  + bignumber + "' value=''></td>" ;
 		htmldata += "<td><a href='#' onclick='modType(" + 
 					bignumber + ")'>" + "Update" + "</a></td>";
@@ -106,6 +107,10 @@ function lineTypes(data,i) {
 					"<td><textarea id='cont" + data[i]['type_id'] + "' name='cont" + data[i]['type_id'] +"' rows='5' cols='30'>" + data[i]['contents'] + "</textarea></td>" +
 					"<td><input type='text' id='image" + data[i]['type_id'] + "' name='image" + data[i]['type_id'] +"' value='" + data[i]['image'] + "'></td>" +
 					"<td><input type='text' id='rate" + data[i]['type_id'] + "' name='rate" + data[i]['type_id'] + "' value='" + data[i]['rate'] + "'></td>" +
+					"<td><input type='checkbox' id='1day" + data[i]['type_id'] + "' name='1day" + data[i]['type_id'] + "' value=1day" ; 
+	if (data[i]['1day'] && data[i]['1day'] == 1)
+		htmldata += " checked";
+	htmldata += "></td>" +
 					"<td><input type='text' id='frw"  + data[i]['type_id'] + "' name='frw"  + data[i]['type_id'] + "' value='" ;
 	data[i]['reserve_with_array'].forEach(function(entry) {
 		htmldata+= entry + "," ;
@@ -329,8 +334,9 @@ async function modType(i) {
 	let cont = document.getElementById('cont'+i).value ;
 	let image = document.getElementById('image'+i).value ;
 	let rate = document.getElementById('rate'+i).value ;
+	let oneday = document.getElementById('1day'+i).checked ;
 	let frw = document.getElementById('frw'+i).value ;
-	if (confirm(i + ", " + cat + ", " + title + ", " + desc + ", " + image + ", " + rate + ", " + frw)) {
+	if (confirm(i + ", " + cat + ", " + title + ", " + desc + ", " + image + ", " + rate + ", " + oneday + "," + frw)) {
 		var itemary = {};
 		itemary['id'] = (i == bignumber) ? "" : i ; // type id, null for update
 		itemary['cat'] = cat;
@@ -338,6 +344,7 @@ async function modType(i) {
 		itemary['desc'] = desc;
 		itemary['image'] = image;
 		itemary['rate']   = rate;
+		itemary['1day']   = oneday;
 		itemary['frw'] = frw;
 		itemary['cont'] = cont;
 		let json_str = (JSON.stringify(itemary)); // encodeURI not work
