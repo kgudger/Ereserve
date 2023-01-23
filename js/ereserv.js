@@ -331,9 +331,9 @@ function calcPrice() {
     // loop through each day, checking
     while (startDate <= endDate) { // 1 or more days
         day = startDate.getDay();
-        if (day >= 0 && day <= 4) { // fix for date is one day in the past
+//        if (day >= 0 && day <= 4) { // fix for date is one day in the past
             ++days;
-        }
+//        }
         startDate.setDate(startDate.getDate() + 1);
     }
 

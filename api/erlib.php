@@ -224,6 +224,7 @@ class DB
 		$descrip = $json['desc']; // description
 		$image   = $json['image']; // image url
 		$rate    = $json['rate']; // rate
+		$oneday  = $json['1day'] == true ? 1 : 0 ; // is it for 1 day?
 		$cont    = $json['cont']; // contents
 		$frw     = explode("," , $json['frw']); // frequently rented with string -> array
 
@@ -234,14 +235,15 @@ class DB
 			$typeid = $tid['max'] + 1 ; // increment
 		}
 		$sql = "INSERT INTO `Types` 
-				VALUES(  ? , ? , ? , ? , ? , 1, ? , ?)
+				VALUES(  ? , ? , ? , ? , ? , 1, ? , ?, ? )
 				ON DUPLICATE KEY UPDATE
 				`cid` = ? , `title` = ?, `description` = ?,
-				`image` = ? , `rate` = ? , `contents` = ?";
+				`image` = ? , `rate` = ? , `contents` = ?, 
+				`active` = 1,`1day` = ?";
 
 		$stmt = $this->db->prepare($sql);
-		$stmt->execute(array($typeid,$cid,$title,$descrip,$image,$rate,$cont,
-							  $cid,$title,$descrip,$image,$rate,$cont));		
+		$stmt->execute(array($typeid,$cid,$title,$descrip,$image,$rate,$cont,$oneday,
+			$cid,$title,$descrip,$image,$rate,$cont,$oneday));		
 		if ( !(empty($frw)) ) { // first delete all old ones
 			$sql = "DELETE FROM `frequently_rented_with` WHERE `tid` = ?" ;
 			$stmt = $this->db->prepare($sql);
