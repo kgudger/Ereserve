@@ -8,7 +8,7 @@
 * @copyright  (c) 2020, Keith Gudger, all rights reserved
 * @license    http://opensource.org/licenses/BSD-2-Clause
 * @version    Release: 0.7
-* @package    SOS
+* @package    Equipment Rentals
 *
 * @note Has processData and showContent, 
 * main and checkForm in MainPage class not overwritten.
@@ -58,10 +58,10 @@ function showContent($title, &$uid) {
 	$retpage .= <<<EOT
 <div id='er_main'>
 EOT;
-	$retpage .= "<div id='er_shop' class='er_srch'><a href='#' onclick='showCart()'>View Your Cart
-				<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/cart.png'></a></div>";
-	$retpage .= "<div id='er_srch' class='er_srch'><input type='text' placeholder='Search Text' onkeydown='erSearch(this.value)' id='er_sin' class='er_sin'>
-				<img src='https://satellite.communitytv.org/wp-content/uploads/2020/07/icons8-search-50.png' onclick='erSClick()'></div>";
+//	$retpage .= "<div id='er_shop' class='er_srch'><a href='#' onclick='showCart()'>View Your Cart
+//				<img src='" . PLUGIN_URL . "img/cart.png'></a></div>";
+	$retpage .= "<div id='er_srch' class='er_srch'><input type='text' style='field-sizing: content; min-width: 5ch;' placeholder='Search Text' onkeydown='erSearch(this.value)' id='er_sin' class='er_sin'>
+				<img src='" . PLUGIN_URL . "img/icons8-search-50.png' onclick='erSClick()'></div>";
 
 	$retpage .= <<<EOT
 <div id='er_menu'>
@@ -75,10 +75,10 @@ EOT;
 	  $n = 0;
 	  while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 	    $cats[$row["name"]] = $row["image"];
-	    $retpage .= "<li><a href='#' onclick='showCat(\"" . $row["name"] . "\")'>" . $row["name"] . "</a></li>";
+	    $retpage .= "<li style='list-style-type: none !important;'><a href='#' onclick='showCat(\"" . $row["name"] . "\")'>" . $row["name"] . "</a></li>";
   	  }  
   } 
-  $retpage .= "<li><a href='#' onclick='showCat(\"Everything\")'>Everything</a></li>";
+  $retpage .= "<li style='list-style-type: none !important;'><a href='#' onclick='showCat(\"Everything\")'>Everything</a></li>";
 //  $retpage .= "<li><a href='#' onclick='showCart()'>Shopping Cart</a></li>";
   $retpage .= <<<EOT
 </ul></div>
@@ -92,7 +92,7 @@ If you want to return to a page or a search, please use the "breadcrumbs" above.
 EOT;
   foreach ($cats as $key => $img) {
 	  $retpage .= "<div class='er_block'><br><br><a href='#' onclick='showCat(\"" . $key . "\")'><h2>" . $key . "</h2>";
-	  $retpage .= "<img class='er_image' src='" . $img . "'></a></div>";
+	  $retpage .= "<img class='er_image' src='" . PLUGIN_URL . $img . "'></a></div>";
   }
   $retpage .= "</div></div>";
   return $retpage;

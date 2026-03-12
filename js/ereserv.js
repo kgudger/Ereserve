@@ -14,6 +14,12 @@
 
 // variable to hold cookie data for this page
 var cookieItems =[]; // global variable for cookie items for this page
+// below needed to find files for any url
+var protocol = window.location.protocol;
+//console.log(`protocol:  ${protocol}`);
+var pathname = window.location.hostname;
+//console.log(`pathname:  ${pathname}`);
+
 
 /**
  * function to display shopping cart 
@@ -226,7 +232,8 @@ async function completeReservation() {
 	resary['starttime'] = starttime;
 	resary['endtime']   = endtime;
 	let json_str = (JSON.stringify(resary)); // encodeURI not work
-	let url = 'https://satellite.communitytv.org/erental.php?command=reserve';
+	// modified to be generic
+	let url = protocol + "//" + pathname + '/wp-content/plugins/Ereserve/erental.php?command=reserve';
 	let response = await postData(json_str,url);
 	if (response['status'] == "OK") {
 		let resId = response['reservation'] ;

@@ -8,7 +8,7 @@
 * @copyright  (c) 2020, Keith Gudger, all rights reserved
 * @license    http://opensource.org/licenses/BSD-2-Clause
 * @version    Release: 0.75
-* @package    SOS
+* @package    Equipment Rentals
 *
 * @note Has processData and showContent, 
 * main and checkForm in MainPage class not overwritten.
@@ -44,7 +44,8 @@ function processData(&$uid) {
 		$stat = $this->formL->getValue("stat" . $row['id']);
 		$date1 = $this->formL->getValue("Date1" . $row['id']);
 		$date2 = $this->formL->getValue("Date2" . $row['id']);
-//		fwrite($fp, '$stat is ' . (($stat == "") ? "Empty" : $stat) . "\n");  
+		fwrite($fp, '$stat is ' . (($stat == "") ? "Empty" : $stat) . "\n");  
+		fwrite($fp, '$date1 is ' . (($date1 == "") ? "Empty" : $stat) . "\n");  
 		if ($stat != "") { // form element exists
 			fwrite($fp, 'id is ' . $row['id'] . "\n");  
 			$rid = $row['id'] ;

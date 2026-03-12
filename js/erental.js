@@ -12,6 +12,11 @@
  *
  */
 
+var protocol = window.location.protocol;
+//console.log(`protocol:  ${protocol}`);
+var pathname = window.location.hostname;
+//console.log(`pathname:  ${pathname}`);
+
 /**
  * function to sort and display Categories
  * @param cat is category to display
@@ -28,7 +33,7 @@ function showCat(cat) {
 		breadBox.push({"cat":cat});
 		let htmldata = printBread();
 		htmldata += "<div id=er_cato><br><h2>" + cat + "</h2><br></div>";
-		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>1 Day Price</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
+		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>1 Day Price</th><th>Extra Day Price</th><th>How Many Available</th></tr>";
 		htmldata += writeLines(retData,cat);
 		htmldata += "</table>";
 		htmldata += "<h4>* Add item to reservation.</h4>";
@@ -53,14 +58,14 @@ function showPage(i,cat) {
 	htmldata += "<br><button class='er_button' onclick='sliceBread(" + 
 		breadspot + ")'>Return to " + cat + " Page</button>";
 	document.getElementById("er_display").innerHTML = htmldata;
-	window.history.pushState(cat, cat + "-" + i, "/equipment-reservations/?" + cat + "-" + i);
+	window.history.pushState(cat, cat + "-" + i, cat + "-" + i);
 }
 
 /**
  * async function to grab data from web, run at load. 
  */
 const fetchRecs = async () => {
-	fetch('https://satellite.communitytv.org/erental.php?command=get').then(response => response.json())
+	fetch(protocol + "//" + pathname + '/wp-content/plugins/Ereserve/erental.php?command=get').then(response => response.json())
 	  .then(data => {
 		retData = data['types']; // global array for data array
 		for (let i = 0; i < retData.length; i++) {
@@ -109,12 +114,12 @@ const fetchRecs = async () => {
 function writeLines(data,cat) {
 	let htmldata = "";
 	for (let i = 0; i < data.length; i++) { // only display category passed
-		if ( (cat == "Everything") || (data[i]['category'] == cat) ) {
+		if ( ( (cat == "Everything") || (data[i]['category'] == cat) && (data[i]['availability'] > 0 ) ) ) {
 			htmldata += "<tr>";
 			htmldata += "<td class='er_t_i'>" + "<a href='#' onclick='showPage("
                                 + i + ",\"" + cat + "\")'>" +
 				data[i]['title'] + "</a></td>"; // onclick to show individual pages
-			htmldata += "<td class='er_t_i'><img class='er_thumb' src='" + 
+			htmldata += "<td class='er_t_i'><img class='er_thumb' src='" + protocol + "//" + pathname + "/wp-content/plugins/Ereserve/" +
 				data[i]['image'] + "'></td>";
 			let sstr = data[i]['description'].substring(0, 500)
 			htmldata += "<td>" + sstr + 
@@ -127,8 +132,8 @@ function writeLines(data,cat) {
 				htmldata += "<td class='er_t_i'>$" + data[i]['rate'] + "</td><td class='er_t_i'>-</td>";
 			htmldata += "<td class='er_t_i'>$" + data[i]['day_rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>" + data[i]['availability'] + "</td>";
-			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
-							data[i]['type_id'] + ")'><img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/plus.png'></td>";
+//			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
+//							data[i]['type_id'] + ")'><img src='" + protocol + "//" + pathname + "/wp-content/plugins/Ereserve/img/plus.png'></td>";
 			htmldata += "</tr>";
 		}
 	}
@@ -159,8 +164,8 @@ fetchRecs();
  */
 function writeItem(data,i,cat) {
 	let htmldata = "";
-	htmldata += "<br><h2>" + data[i]['title'] + "</h2>" ;
-	htmldata += "<img src='" + data[i]['image'] + "'>" ;	
+	htmldata += "<br><h2>" + data[i]['title'] + "</h2>" ; // + "/wp-content/plugins/Ereserve/" +
+	htmldata += "<img src='" + protocol + "//" + pathname + "/wp-content/plugins/Ereserve/" + data[i]['image'] + "'>" ;	
 	htmldata += "<p>" + data[i]['description'] + "</p><br>" ;
 	if ( ( data[i]['1day'] != null ) && ( data[i]['1day'] == 1 ) ) 
 		htmldata += "<p><strong>1 Day Price:</strong> $" 
@@ -181,8 +186,8 @@ function writeItem(data,i,cat) {
 		});
 		htmldata += "<br>";
 	}
-	htmldata += "<button class='er_button' onclick='cookRes(" + 
-		data[i]['type_id'] + ")'>Add to Reservation</button>";
+/*	htmldata += "<button class='er_button' onclick='cookRes(" + 
+		data[i]['type_id'] + ")'>Add to Reservation</button>"; */
 	// onclick adds to cookie 
 	return htmldata;
 }
@@ -279,13 +284,13 @@ function outSearch(data,darr) {
 	let htmldata = printBread();
 	htmldata += "<div id=er_searcho><br><h2>Search Results</h2><br></div>";
 	if (darr.length > 0) { // if results
-		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th><th>Add<img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/asterisk.png'></th></tr>";
+		htmldata += "<table class='er_table'><tr><th>Title</th><th>Image</th></th><th>Description</th><th>3 Day Price</th><th>Extra Day Price</th><th>How Many Available</th>></tr>";
 		darr.forEach(function(entry) {
 			htmldata += "<tr>";
 			htmldata += "<td class='er_t_i'>" + "<a href='#' onclick='showPage("
                                 + entry + ",\"Search\"" + ")'>" +
 				data[entry]['title'] + "</a></td>"; // onclick to show individual pages
-			htmldata += "<td class='er_t_i'><img class='er_thumb' src='" + 
+			htmldata += "<td class='er_t_i'><img class='er_thumb' src='" + protocol + "//" + pathname + "/wp-content/plugins/Ereserve/" +
 				data[entry]['image'] + "'></td>";
 			let sstr = data[entry]['description'].substring(0, 500)
 			htmldata += "<td>" + sstr + 
@@ -295,8 +300,8 @@ function outSearch(data,darr) {
 			htmldata += "<td class='er_t_i'>$" + data[entry]['rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>$" + data[entry]['day_rate'] + "</td>";
 			htmldata += "<td class='er_t_i'>" + data[entry]['availability'] + "</td>";
-			htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
-							data[entry]['type_id'] + ")'><img src='https://satellite.communitytv.org/wp-content/plugins/Ereserve/img/plus.png'></td>";
+	//		htmldata += "<td class='er_t_i'><a href='#' onclick='cookRes(" + 
+	//						data[entry]['type_id'] + ")'><img src='" + protocol + "//" + pathname + "/wp-content/plugins/Ereserve/img/plus.png'></td>";
 			htmldata += "</tr>";
 		});
 		htmldata += "</table>";
@@ -306,7 +311,7 @@ function outSearch(data,darr) {
 		htmldata+= "<strong>No Results Found</strong>";
 		// add store to file here
 		let json_str = (JSON.stringify(searchTerm)); 
-		let url = 'https://satellite.communitytv.org/erental.php?command=search';
+		let url = protocol + "//" + pathname + '/wp-content/plugins/Ereserve/erental.php?command=search';
 		let response = postData(json_str,url);
 	}
 	document.getElementById("er_display").innerHTML = htmldata;

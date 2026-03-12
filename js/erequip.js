@@ -13,6 +13,10 @@
  
 var bignumber = 9999; // a big number for ids in page;
 
+var protocol = window.location.protocol;
+//console.log(`protocol:  ${protocol}`);
+var pathname = window.location.hostname;
+//console.log(`pathname:  ${pathname}`);
 
 /**
  * function to sort and display Categories
@@ -305,7 +309,7 @@ async function modItem(i) {
 		itemary['status'] = status;
 		itemary['active'] = active;
 		let json_str = (JSON.stringify(itemary)); // encodeURI not work
-		let url = 'https://satellite.communitytv.org/erental.php?command=upItem';
+		let url = protocol + "//" + pathname + '/wp-content/plugins/Ereserve/erental.php?command=upItem';
 		let response = await postData(json_str,url);
 		if (response['status'] == "OK") {
 			// get data array again
@@ -348,7 +352,8 @@ async function modType(i) {
 		itemary['frw'] = frw;
 		itemary['cont'] = cont;
 		let json_str = (JSON.stringify(itemary)); // encodeURI not work
-		let url = 'https://satellite.communitytv.org/erental.php?command=upType';
+		let url = protocol + "//" + pathname + 
+			'/wp-content/plugins/Ereserve/erental.php?command=upType';
 		let response = await postData(json_str,url);
 		if (response['status'] == "OK") {
 			// get data array again

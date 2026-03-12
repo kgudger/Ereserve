@@ -8,7 +8,7 @@
 * @copyright  (c) 2020, Keith Gudger, all rights reserved
 * @license    http://opensource.org/licenses/BSD-2-Clause
 * @version    Release: 0.7
-* @package    EReservve
+* @package    EReserve
 *
 * @note Has showContent, 
 * main and checkForm in MainPage class not overwritten.

@@ -13,7 +13,8 @@ class DB
 	{
 	    if ($this->db == 0)
 	    {
-	        require_once("/var/www/html/satellite/wp-content/plugins/Ereserve/dbconvars.php");
+		$current_dir = getcwd(); // gets current directory
+	        require_once($current_dir . "/dbconvars.php");
 		try {
 	        /* Establish database connection */
 	        	$this->db = new PDO("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpwd);
